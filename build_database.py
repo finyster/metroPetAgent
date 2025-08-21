@@ -1,17 +1,26 @@
 # build_database.py
+"""
+======================================================================
+|               MetroPet AI Agent - Database Builder               |
+|                  (採用 finyster 分支的強化架構)                  |
+======================================================================
+此腳本是啟動主程式前的「必要前置作業」。
+它負責從各種外部 API (TDX, 北捷 SOAP) 和本地檔案 (CSV) 獲取最新的
+捷運站點、票價、轉乘、出口、設施及遺失物等資訊，並將這些資料
+處理後，儲存為專案所需的 .json 檔案，存放於 /data 資料夾中。
+"""
 
-import os
+# ---------------------------------------------------------------------
+# 1. 核心模組匯入 (Core Module Imports)
+# ---------------------------------------------------------------------
+import argparse
 import json
+import os
 import re
 import time
+import pandas as pd
 import config
 from services.tdx_service import tdx_api
-import argparse # ✨ 新增這一行
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd # 確保頂部有 import pandas
-
-# --- 【✨核心新增✨】確保您在檔案最上方，匯入了 metro_soap_api ---
 from services.metro_soap_service import metro_soap_api
 
 # 為了避免循環依賴和簡化，我們在這裡重新定義一個與 StationManager 內部邏輯相同的 normalize_name 函數。
@@ -195,6 +204,7 @@ def build_fare_database():
             adult_fare = next((f.get("Price") for f in fares if f.get("TicketType") == 1 and f.get("FareClass") == 1), None)
             child_fare = next((f.get("Price") for f in fares if f.get("TicketType") == 1 and f.get("FareClass") == 4), None)
             if adult_fare is not None and child_fare is not None:
+                # 同時建立正向和反向的 key，確保查詢萬無一失
                 key1 = f"{o_id}-{d_id}"
                 key2 = f"{d_id}-{o_id}"
                 fare_data = {"全票": adult_fare, "兒童票": child_fare}
@@ -301,43 +311,6 @@ def build_facilities_database():
         print(f"--- ❌ 步驟 5 失敗: 處理 CSV 或建立 JSON 時發生錯誤: {e} ---")
 
     time.sleep(1)
-
-def build_exit_database():
-    """從 TDX API 獲取車站出入口資訊，並儲存為 JSON 檔案。"""
-    print("\n--- [5/5] 正在建立「車站出入口資料庫」... ---")
-    
-    all_exits_data = tdx_api.get_station_exits(rail_system="TRTC")
-    
-    if not all_exits_data:
-        print("--- ❌ 步驟 5 失敗: 無法獲取車站出入口資料。 ---")
-        return
-
-    exit_map = {}
-    processed_exit_count = 0
-    for exit_info in all_exits_data:
-        station_id = exit_info.get("StationID")
-        exit_no = exit_info.get("ExitID")
-        if exit_no is None:
-            exit_no = exit_info.get("''ExitID'") 
-
-        exit_description_obj = exit_info.get("ExitDescription", {})
-        exit_description = exit_description_obj.get("Zh_tw", "無描述")
-        
-        if not (station_id and exit_no):
-            print(f"--- ⚠️ Skipping exit info due to missing StationID or ExitNo: {exit_info} ---")
-            continue
-        
-        if station_id not in exit_map:
-            exit_map[station_id] = []
-        exit_map[station_id].append({"ExitNo": exit_no, "Description": exit_description.strip()})
-        processed_exit_count += 1
-
-    os.makedirs(os.path.dirname(config.EXIT_DATA_PATH), exist_ok=True)
-    with open(config.EXIT_DATA_PATH, 'w', encoding='utf-8') as f:
-        json.dump(exit_map, f, ensure_ascii=False, indent=4)
-
-    print(f"--- ✅ 車站出入口資料庫已成功建立於 {config.EXIT_DATA_PATH}，共包含 {len(exit_map)} 個站點的出入口資訊，總共處理了 {processed_exit_count} 筆出口記錄。 ---")
-    time.sleep(1)
     
 # --- 【✨最終簡化版✨】 ---
 def build_lost_and_found_database():
@@ -364,36 +337,48 @@ def build_lost_and_found_database():
     except Exception as e:
         print(f"--- ❌ 步驟 6 失敗: 建立遺失物資料庫時發生未知錯誤: {e} ---")
 
+# ---------------------------------------------------------------------
+# 4. 主程式執行 (Main Execution Block)
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Build local databases for the MetroPet AI Agent.")
+    parser = argparse.ArgumentParser(
+        description="Build local databases for the MetroPet AI Agent.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument(
-        "--name", 
+        "--name",
         type=str,
         default="all",
-        choices=["stations", "fares", "transfers", "facilities", "exits", "lost_and_found", "all"],
-        help="Specify which database to build. Use 'all' to build everything."
+        # 【修改】已移除 "exits" 選項
+        choices=["stations", "fares", "transfers", "facilities", "lost_and_found", "all"],
+        help="Specify which database to build.\n"
+             " - stations: Build station name/ID map\n"
+             " - fares: Build fare database\n"
+             " - transfers: Build transfer info\n"
+             " - facilities: Build station facilities from CSV\n"
+             " - lost_and_found: Build lost & found database\n"
+             " - all: Build all of the above (default)"
     )
     args = parser.parse_args()
 
+    # 使用字典來映射參數和函式，讓程式碼更簡潔
+    db_builders = {
+        "stations": build_station_database,
+        "fares": build_fare_database,
+        "transfers": build_transfer_database,
+        "facilities": build_facilities_database,
+        "lost_and_found": build_lost_and_found_database,
+    }
+
     if args.name == "all":
-        print("--- 正在開始建立所有本地資料庫，這可能需要一些時間... ---")
-        build_station_database()
-        build_fare_database()
-        build_transfer_database()
-        build_facilities_database()
-        build_exit_database()
-        build_lost_and_found_database()
-        print("\n--- ✅ 所有本地資料庫建立完成！ ---")
-    
-    elif args.name == "stations":
-        build_station_database()
-    elif args.name == "fares":
-        build_fare_database()
-    elif args.name == "transfers":
-        build_transfer_database()
-    elif args.name == "facilities":
-        build_facilities_database()
-    elif args.name == "exits":
-        build_exit_database()
-    elif args.name == "lost_and_found":
-        build_lost_and_found_database()
+        print("--- 正在開始建立所有本地資料庫... ---")
+        # 遍歷字典中的所有函式並執行
+        for name, builder in db_builders.items():
+            builder()
+        print("\n--- 🎉 所有本地資料庫建立完成！ ---")
+    else:
+        # 執行指定的單一建置函式
+        # 確保使用者輸入的 name 存在於我們的字典中
+        if args.name in db_builders:
+            db_builders[args.name]()
+            print(f"\n--- 🎉 '{args.name}' 資料庫建立完成！ ---")

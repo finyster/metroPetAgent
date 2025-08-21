@@ -1,22 +1,29 @@
 # services/routing_service.py
 
+# ---------------------------------------------------------------------
+# 核心模組匯入 (Core Module Imports)
+# ---------------------------------------------------------------------
 import json
+import logging
+import re
+from typing import Any, Dict, List
+
 import networkx as nx
 import config
-import re
+from services.metro_soap_service import MetroSoapService
 from services.tdx_service import tdx_api
-from utils.exceptions import StationNotFoundError, RouteNotFoundError
+from utils.exceptions import RouteNotFoundError, StationNotFoundError
 from utils.station_name_normalizer import normalize_station_name
-import logging
-from typing import List, Dict, Any
+from .station_service import StationManager
 
 logger = logging.getLogger(__name__)
 
 class RoutingManager:
-    def __init__(self, station_manager_instance):
+    def __init__(self, station_manager_instance: StationManager, metro_soap_service_instance: MetroSoapService):
         logger.info("--- [Routing Service] 正在初始化並建立智慧捷運路網圖... ---")
 
         self.station_manager = station_manager_instance
+        self.metro_soap_service = metro_soap_service_instance        
         self.station_id_to_name = self._load_station_id_map(self.station_manager.station_map)
 
         self.line_details: Dict[str, Dict[str, Any]] = {}

@@ -1,10 +1,16 @@
 feature
 hour
+minute
 day_of_week
 is_weekend
+is_peak_hour
+is_transfer_station
 car_number
 lag_5min_congestion
 lag_1hr_congestion
+station_id_1
+station_id_2
+station_id_3
 station_id_BL01
 station_id_BL02
 station_id_BL03
@@ -28,6 +34,7 @@ station_id_BL20
 station_id_BL21
 station_id_BL22
 station_id_BL23
+station_id_DEPOT
 station_id_G01
 station_id_G02
 station_id_G03

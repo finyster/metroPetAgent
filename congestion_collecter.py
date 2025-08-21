@@ -1,28 +1,31 @@
-import os
+# data_collector.py
+
 import pandas as pd
-import time
+import os
 import logging
-from typing import List, Dict, Any, Optional
-
-# 假設 metro_soap_service.py 位於 services/ 目錄下
-# 為了能獨立執行此腳本，我們需要手動將專案根目錄加入 sys.path
-import sys
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if project_root not in sys.path:
-    sys.path.append(project_root)
-
-# 現在可以安全地導入
+from datetime import datetime
+# 假設您的 service 檔案位於 services/metro_soap_service.py
 from services.metro_soap_service import metro_soap_api
+import time
 
-# --- 配置日誌 ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# --- (日誌設定與路徑定義，這部分維持原樣即可) ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s,%(msecs)03d - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# --- 【關鍵】定義我們最終想要的、標準化的資料欄位 ---
+# 專案根目錄，假設此腳本在專案根目錄下
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
+
+HIGH_CAPACITY_CONGESTION_FILE = os.path.join(DATA_DIR, 'high_capacity_congestion.csv')
+WENHU_CONGESTION_FILE = os.path.join(DATA_DIR, 'wenhu_congestion.csv')
+
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# 【關鍵點1】定義了統一的、乾淨的欄位標準
 FINAL_COLUMNS = [
     'timestamp', 
     'station_id', 
-    'line_direction_cid', 
+    'line_direction_cid',
     'car1_congestion', 
     'car2_congestion', 
     'car3_congestion', 
@@ -31,135 +34,123 @@ FINAL_COLUMNS = [
     'car6_congestion'
 ]
 
-def process_high_capacity_data(raw_data: List[Dict[str, Any]]) -> Optional[pd.DataFrame]:
-    """
-    【核心轉換邏輯】處理高運量線的原始 API 資料。
-    將 API 回傳的不規則欄位名，映射到我們標準化的欄位名。
-    """
-    if not raw_data:
-        logger.warning("高運量線原始資料為空，跳過處理。")
-        return None
-
-    processed_records = []
-    for item in raw_data:
-        # 【關鍵】處理 'line_direction_cid' 可能為 '401/402' 的格式，我們只取第一個數字
+# --- (load_data 和 save_data 函數維持原樣，它們的設計是正確的) ---
+def load_data(file_path: str) -> pd.DataFrame:
+    if os.path.exists(file_path):
         try:
-            direction_cid_str = str(item.get('line_direction_cid', '')).split('/')[0]
-            direction_cid = int(direction_cid_str)
-        except (ValueError, IndexError):
-            logger.warning(f"無法解析高運量線的 direction_cid: {item.get('line_direction_cid')}，跳過此筆記錄。")
-            continue
+            df = pd.read_csv(file_path)
+            return df.reindex(columns=FINAL_COLUMNS, fill_value=0)
+        except pd.errors.EmptyDataError:
+            logger.warning(f"⚠️ CSV 檔案 '{file_path}' 為空，將建立新的 DataFrame。")
+            return pd.DataFrame(columns=FINAL_COLUMNS)
+        except Exception as e:
+            logger.error(f"❌ 載入檔案 '{file_path}' 時發生錯誤: {e}", exc_info=True)
+            return pd.DataFrame(columns=FINAL_COLUMNS)
+    logger.info(f"📁 檔案 '{file_path}' 不存在，將建立新的 DataFrame。")
+    return pd.DataFrame(columns=FINAL_COLUMNS)
 
-        record = {
-            'timestamp': item.get('update_time'),
-            'station_id': item.get('station_id'),
-            'line_direction_cid': direction_cid,
-            'car1_congestion': item.get('car1_congestion'),
-            'car2_congestion': item.get('car2_congestion'),
-            'car3_congestion': item.get('car3_congestion'),
-            'car4_congestion': item.get('car4_congestion'),
-            'car5_congestion': item.get('car5_congestion'),
-            'car6_congestion': item.get('car6_congestion')
-        }
-        
-        # 驗證必要欄位是否存在
-        if not all([record['timestamp'], record['station_id']]):
-            logger.warning(f"高運量線記錄缺少必要欄位 (timestamp/station_id)，跳過: {item}")
-            continue
-            
-        processed_records.append(record)
-    
-    if not processed_records:
-        logger.warning("沒有成功處理任何高運量線記錄。")
-        return None
+def save_data(df: pd.DataFrame, file_path: str):
+    # 【關鍵點2】儲存前，強制 DataFrame 符合 FINAL_COLUMNS 的結構
+    df_to_save = df.reindex(columns=FINAL_COLUMNS, fill_value=0)
+    df_to_save.to_csv(file_path, index=False, mode='w', header=True)
+    logger.info(f"📊 已將 {len(df_to_save)} 筆資料儲存到 {file_path}")
 
-    df = pd.DataFrame(processed_records)
-    return df
+# --- (process_* 函數維持原樣，它們的設計是正確的) ---
 
-def process_wenhu_data(raw_data: List[Dict[str, Any]]) -> Optional[pd.DataFrame]:
-    """
-    【核心轉換邏輯】處理文湖線的原始 API 資料。
-    文湖線只有4節車廂，我們將 car5 和 car6 填充為 NaN (空值)。
-    """
-    if not raw_data:
-        logger.warning("文湖線原始資料為空，跳過處理。")
-        return None
-        
+def process_high_capacity_data(raw_data: list[dict]) -> pd.DataFrame:
     processed_records = []
     for item in raw_data:
         try:
-            direction_cid = int(item.get('line_direction_cid'))
-        except (ValueError, TypeError):
-            logger.warning(f"無法解析文湖線的 direction_cid: {item.get('line_direction_cid')}，跳過此筆記錄。")
+            # 【關鍵點3】從複雜的 API 回應中，只挑選我們需要的欄位，並對應到標準名稱
+            record = {
+                'timestamp': item.get('utime', ''),
+                'station_id': item.get('StationID', ''),
+                'line_direction_cid': int(item.get('CID', '0')) if str(item.get('CID', '0')).isdigit() else 0,
+                'car1_congestion': item.get('Cart1L', '0'),
+                'car2_congestion': item.get('Cart2L', '0'),
+                'car3_congestion': item.get('Cart3L', '0'),
+                'car4_congestion': item.get('Cart4L', '0'),
+                'car5_congestion': item.get('Cart5L', '0'),
+                'car6_congestion': item.get('Cart6L', '0')
+            }
+            if not all([record['timestamp'], record['station_id']]):
+                logger.warning(f"高運量線記錄缺少必要欄位 (timestamp/station_id)，跳過: {item}")
+                continue
+            processed_records.append(record)
+        except Exception as e:
+            logger.error(f"❌ 處理高運量線單筆資料時發生錯誤: {item} - {e}", exc_info=True)
             continue
-
-        record = {
-            'timestamp': item.get('update_time'),
-            'station_id': item.get('station_id'),
-            'line_direction_cid': direction_cid,
-            'car1_congestion': item.get('car1_congestion'),
-            'car2_congestion': item.get('car2_congestion'),
-            'car3_congestion': item.get('car3_congestion'),
-            'car4_congestion': item.get('car4_congestion'),
-            'car5_congestion': None,  # 文湖線沒有5號車廂
-            'car6_congestion': None   # 文湖線沒有6號車廂
-        }
-
-        if not all([record['timestamp'], record['station_id']]):
-            logger.warning(f"文湖線記錄缺少必要欄位 (timestamp/station_id)，跳過: {item}")
-            continue
-        
-        processed_records.append(record)
-
-    if not processed_records:
-        logger.warning("沒有成功處理任何文湖線記錄。")
-        return None
-
     df = pd.DataFrame(processed_records)
+    # 再次確保欄位結構正確
+    df = df.reindex(columns=FINAL_COLUMNS, fill_value=0)
     return df
 
+def process_wenhu_data(raw_data: list[dict]) -> pd.DataFrame:
+    processed_records = []
+    for item in raw_data:
+        try:
+            # 【關鍵點4】同樣地，處理文湖線資料，並手動補上不存在的車廂
+            record = {
+                'timestamp': item.get('UpdateTime', ''),
+                'station_id': item.get('StationID', ''),
+                'line_direction_cid': int(item.get('CID', '0')) if str(item.get('CID', '0')).isdigit() else 0,
+                'car1_congestion': item.get('Car1', '0'),
+                'car2_congestion': item.get('Car2', '0'),
+                'car3_congestion': item.get('Car3', '0'),
+                'car4_congestion': item.get('Car4', '0'),
+                'car5_congestion': '0', # 文湖線固定為0
+                'car6_congestion': '0'  # 文湖線固定為0
+            }
+            if not all([record['timestamp'], record['station_id']]):
+                logger.warning(f"文湖線記錄缺少必要欄位 (timestamp/station_id)，跳過: {item}")
+                continue
+            processed_records.append(record)
+        except Exception as e:
+            logger.error(f"❌ 處理文湖線單筆資料時發生錯誤: {item} - {e}", exc_info=True)
+            continue
+    df = pd.DataFrame(processed_records)
+    df = df.reindex(columns=FINAL_COLUMNS, fill_value=0)
+    return df
 
-def collect_and_save_data():
-    """收集、處理並儲存擁擠度數據。"""
+# --- (主邏輯 collect_and_save_congestion_data 維持原樣) ---
+def collect_and_save_congestion_data():
     logger.info("--- [Collector] 開始新一輪資料收集 ---")
     
-    # 1. 收集高運量線資料
-    raw_high_capacity = metro_soap_api.get_high_capacity_car_weight_info()
-    if raw_high_capacity:
-        df_high = process_high_capacity_data(raw_high_capacity)
-        if df_high is not None and not df_high.empty:
-            output_path = os.path.join(project_root, 'data', 'high_capacity_congestion.csv')
-            # 確保所有欄位都存在，且順序正確
-            df_high = df_high.reindex(columns=FINAL_COLUMNS)
-            df_high.to_csv(output_path, mode='a', header=not os.path.exists(output_path), index=False)
-            logger.info(f"    -> ✅ 成功處理並儲存 {len(df_high)} 筆高運量線資料。")
+    # 高運量線
+    logger.info("--- 嘗試獲取高運量線資料 ---")
+    high_capacity_raw_data = metro_soap_api.get_high_capacity_car_weight_info()
+    if high_capacity_raw_data:
+        processed_df = process_high_capacity_data(high_capacity_raw_data)
+        existing_df = load_data(HIGH_CAPACITY_CONGESTION_FILE)
+        combined_df = pd.concat([existing_df, processed_df]).drop_duplicates(subset=['timestamp', 'station_id', 'line_direction_cid'], keep='last').reset_index(drop=True)
+        save_data(combined_df, HIGH_CAPACITY_CONGESTION_FILE)
+        logger.info(f"    -> ✅ 高運量線處理完畢。新獲取 {len(processed_df)} 筆，目前總共 {len(combined_df)} 筆。")
     else:
-        logger.error("    -> ❌ 從 API 獲取高運量線資料失敗。")
+        logger.error("    -> ❌ 從 API 獲取高運量線原始資料失敗。")
 
-    # 2. 收集文湖線資料
-    raw_wenhu = metro_soap_api.get_wenhu_car_weight_info()
-    if raw_wenhu:
-        df_wenhu = process_wenhu_data(raw_wenhu)
-        if df_wenhu is not None and not df_wenhu.empty:
-            output_path = os.path.join(project_root, 'data', 'wenhu_congestion.csv')
-            # 確保所有欄位都存在，且順序正確
-            df_wenhu = df_wenhu.reindex(columns=FINAL_COLUMNS)
-            df_wenhu.to_csv(output_path, mode='a', header=not os.path.exists(output_path), index=False)
-            logger.info(f"    -> ✅ 成功處理並儲存 {len(df_wenhu)} 筆文湖線資料。")
+    # 文湖線
+    logger.info("--- 嘗試獲取文湖線資料 ---")
+    wenhu_raw_data = metro_soap_api.get_wenhu_car_weight_info()
+    if wenhu_raw_data:
+        processed_df = process_wenhu_data(wenhu_raw_data)
+        existing_df = load_data(WENHU_CONGESTION_FILE)
+        combined_df = pd.concat([existing_df, processed_df]).drop_duplicates(subset=['timestamp', 'station_id', 'line_direction_cid'], keep='last').reset_index(drop=True)
+        save_data(combined_df, WENHU_CONGESTION_FILE)
+        logger.info(f"    -> ✅ 文湖線處理完畢。新獲取 {len(processed_df)} 筆，目前總共 {len(combined_df)} 筆。")
     else:
-        logger.error("    -> ❌ 從 API 獲取文湖線資料失敗。")
+        logger.error("    -> ❌ 從 API 獲取文湖線原始資料失敗。")
+
+    logger.info("--- [Collector] 資料收集完成，等待 5 分鐘後下一次更新... ---")
 
 
 if __name__ == "__main__":
-    # 確保 data 資料夾存在
-    data_dir = os.path.join(project_root, 'data')
-    os.makedirs(data_dir, exist_ok=True)
-    
     while True:
         try:
-            collect_and_save_data()
-            logger.info("--- [Collector] 資料收集完成，等待 5 分鐘後下一次更新... ---\n")
-            time.sleep(300)
+            collect_and_save_congestion_data()
+            time.sleep(5 * 60) # 等待 5 分鐘
+        except KeyboardInterrupt:
+            logger.info("--- [Collector] 收到手動中斷指令，程式正在關閉... ---")
+            break
         except Exception as e:
             logger.critical(f"--- ❌ Collector 主迴圈發生嚴重錯誤: {e} ---", exc_info=True)
             logger.info("--- [Collector] 將在 5 分鐘後重試... ---\n")

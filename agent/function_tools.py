@@ -1,42 +1,73 @@
+# agent/function_tools.py
 """
-agent/function_tools.py
-~~~~~~~~~~~~~~~~~~~~~~~
-所有可被 LLM Agent 呼叫的工具函式。
+======================================================================
+|                MetroPet AI Agent - Function Tools                |
+|                  (融合 finyster & alan 分支功能)                   |
+======================================================================
+此檔案定義了所有可供 LangChain Agent 呼叫的工具函式。
+整合了兩大分支的核心功能：
+- finyster 分支: 專精於路徑規劃、生活資訊 (美食、設施、出口)、智慧搜尋。
+- alan/main 分支: 專精於即時營運數據 (票價、班次、擁擠度、到站時間)。
 """
 
-from pathlib import Path
+# ---------------------------------------------------------------------
+# 1. 核心模組匯入 (Core Module Imports)
+# ---------------------------------------------------------------------
 import json
 import logging
+import random
+import re
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
+
+import dateparser
 from dotenv import load_dotenv
 from langchain_core.tools import tool
+
+import config
 from services import service_registry
-import config, re
-
-from utils.station_name_normalizer import normalize_station_name
 from services.lost_item_search_service import lost_item_search_service
-from datetime import datetime, timedelta
-from utils.exceptions import StationNotFoundError, RouteNotFoundError
+from services.realtime_mrt_service import RealtimeMRTService
+from utils.exceptions import (DataLoadError, RouteNotFoundError,
+                              StationNotFoundError)
+from utils.station_name_normalizer import normalize_station_name
+
 
 # ---------------------------------------------------------------------
-# 基本設定
+# 2. 基本設定 (Basic Configuration)
 # ---------------------------------------------------------------------
+# 初始化日誌記錄器
 logger = logging.getLogger(__name__)
 
+# 載入環境變數 (若 .env 檔案存在)
 BASE_DIR = Path(__file__).resolve().parents[1]
-load_dotenv(BASE_DIR / ".env")  # 若入口檔已載入 .env，可拿掉
+load_dotenv(BASE_DIR / ".env")
+
 
 # ---------------------------------------------------------------------
-# 常用單例服務
+# 3. 服務實例化 (Service Instantiation)
 # ---------------------------------------------------------------------
-
-metro_soap_api     = service_registry.get_soap_api()
-routing_manager    = service_registry.get_routing_manager()
-fare_service       = service_registry.get_fare_service()
-station_manager    = service_registry.get_station_manager()
+# 從 ServiceRegistry 獲取所有需要的服務單例，確保資源被集中管理且只初始化一次。
+logger.info("--- [Tools] 正在從 ServiceRegistry 獲取所有服務實例... ---")
+station_manager = service_registry.get_station_manager()
+routing_manager = service_registry.get_routing_manager()
+fare_service = service_registry.get_fare_service()
 local_data_manager = service_registry.get_local_data_manager()
-tdx_api            = service_registry.get_tdx_api()
-# 新增：ID 轉換服務
-id_converter       = service_registry.id_converter_service
+# 修正：alan/main 的 metro_soap_service 更完整，應使用 get_metro_soap_service
+metro_soap_service = service_registry.get_metro_soap_api()
+tdx_api = service_registry.get_tdx_api()
+id_converter = service_registry.id_converter_service
+congestion_predictor = service_registry.get_congestion_predictor()
+first_last_train_time_service = service_registry.get_first_last_train_time_service()
+realtime_mrt_service = service_registry.get_realtime_mrt_service()
+
+# Emoji 對應表，用於美化擁擠度輸出
+CONGESTION_EMOJI_MAP = {1: "😊 舒適", 2: "🤔 正常", 3: "😥 略多", 4: "😡 擁擠"}
+
+# =====================================================================
+# 4. Agent 工具定義 (Tool Definitions)
+# =====================================================================
 
 # ---------------------------------------------------------------------
 # 1. 路徑規劃
@@ -124,54 +155,169 @@ def plan_route(start_station_name: str, end_station_name: str) -> str:
 # ---------------------------------------------------------------------
 @tool
 def get_mrt_fare(start_station_name: str, end_station_name: str) -> str:
-    """【票價查詢專家】回傳全票與兒童票價格，不含路徑規劃。"""
-    logger.info(f"[票價] {start_station_name} → {end_station_name}")
+    """
+    【基礎票價查詢】當使用者僅詢問「多少錢」、「票價」、「費用」，但未指定特定身份（如老人、兒童、學生）時使用。
+    此工具提供標準的「全票」和「兒童票」票價。
+    如果使用者詢問特定票種（如愛心票、敬老票、學生票、台北市兒童票），請改用 `get_detailed_fare_info` 工具。
+    """
+    logger.info(f"--- [工具(基礎票價)] 查詢: {start_station_name} -> {end_station_name} ---")
     try:
-        fare = fare_service.get_fare(start_station_name, end_station_name)
+        fare_info = fare_service.get_fare(start_station_name, end_station_name)
+        message_parts = [f"從「{start_station_name}」到「{end_station_name}」的票價資訊如下："]
+        
+        if '全票' in fare_info:
+            message_parts.append(f"全票為 NT${fare_info['全票']}。")
+        if '兒童票' in fare_info:
+            message_parts.append(f"兒童票為 NT${fare_info['兒童票']}。")
+        
+        if len(message_parts) == 1:
+            message_parts.append("抱歉，目前沒有找到該路線的票價資訊。")
+        else:
+            message_parts.append("\n如需查詢愛心票、學生票等特殊票種，請提供您的乘客類型。")
+
         return json.dumps({
             "start_station": start_station_name,
-            "end_station":   end_station_name,
-            "full_fare":     fare.get("full_fare", "未知"),
-            "child_fare":    fare.get("child_fare", "未知"),
-            "message": (
-                f"從「{start_station_name}」到「{end_station_name}」的"
-                f"全票 NT${fare.get('full_fare', '未知')}，"
-                f"兒童票 NT${fare.get('child_fare', '未知')}。"
-            )
+            "end_station": end_station_name,
+            "fare_details": fare_info,
+            "message": "\n".join(message_parts)
         }, ensure_ascii=False)
     except StationNotFoundError as e:
+        logger.warning(f"--- [工具(基礎票價)] 查詢時發生錯誤: {e} ---")
         return json.dumps({"error": str(e)}, ensure_ascii=False)
     except Exception as e:
-        logger.exception("票價查詢失敗")
-        return json.dumps({"error": f"查詢票價時發生錯誤：{e}"}, ensure_ascii=False)
+        logger.error(f"--- [工具(基礎票價)] 查詢時發生未知錯誤: {e} ---", exc_info=True)
+        return json.dumps({"error": f"抱歉，查詢票價時發生內部問題。"}, ensure_ascii=False)
+    
+@tool
+def get_detailed_fare_info(start_station_name: str, end_station_name: str, passenger_type: str) -> str:
+    """
+    【特殊票價專家】當使用者詢問特定身份或票種的票價時（例如「愛心票」、「敬老票」、「學生票」、「台北市兒童」、「新北市兒童」、「一日票」、「24小時票」），專門使用此工具。
+    Args:
+        start_station_name (str): 起點站名。
+        end_station_name (str): 終點站名。
+        passenger_type (str): 必須提供一個乘客類型，例如 "愛心票", "台北市兒童", "學生票", "一日票" 等。
+    """
+    logger.info(f"--- [工具(詳細票價)] 查詢: {start_station_name} -> {end_station_name}, 類型: {passenger_type} ---")
+    try:
+        fare_details = fare_service.get_fare_details(start_station_name, end_station_name, passenger_type)
+        
+        if "error" in fare_details:
+            return json.dumps(fare_details, ensure_ascii=False)
+
+        message = (
+            f"從「{start_station_name}」到「{end_station_name}」，"
+            f"「{passenger_type}」的票價為 NT${fare_details.get('fare', '未知')}。"
+            f" ({fare_details.get('description', '無詳細說明')})"
+        )
+        
+        fare_details["message"] = message
+        return json.dumps(fare_details, ensure_ascii=False)
+        
+    except StationNotFoundError as e:
+        logger.warning(f"--- [工具(詳細票價)] 查詢時發生錯誤: {e} ---")
+        return json.dumps({"error": str(e)}, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"--- [工具(詳細票價)] 查詢時發生未知錯誤: {e} ---", exc_info=True)
+        return json.dumps({"error": f"抱歉，查詢詳細票價時發生內部問題。"}, ensure_ascii=False)
 
 # ---------------------------------------------------------------------
 # 3. 首末班車
 # ---------------------------------------------------------------------
 @tool
 def get_first_last_train_time(station_name: str) -> str:
-    """【首末班車專家】查詢指定站點各方向首/末班時間。"""
-    logger.info(f"[首末班車] {station_name}")
-    station_ids = station_manager.get_station_ids(station_name)
-    if not station_ids:
-        return json.dumps({"error": f"找不到車站「{station_name}」。"}, ensure_ascii=False)
+    """
+    【暖心班次小助理】當使用者可能錯過列車，或是在深夜、清晨查詢班次時，用這個工具來查詢指定捷運站的首末班車時間。它會用友善貼心的方式回報，並提供溫馨提醒和可愛的小圖示。
+    """
+    logger.info(f"--- [工具(首末班車)] 查詢首末班車時間: {station_name} ---")
+    
+    first_last_train_time_service = service_registry.first_last_train_time_service
 
-    timetable = tdx_api.get_first_last_timetable(station_ids[0])
-    if not timetable:
-        return json.dumps({"error": f"查無「{station_name}」首末班車資訊"}, ensure_ascii=False)
+    if first_last_train_time_service is None:
+        logger.error("FirstLastTrainTimeService 未初始化。請檢查 ServiceRegistry 的初始化流程。")
+        return json.dumps({"error": "🥺 抱歉！目前捷運資訊服務好像有點小狀況，請您稍後再試試看喔！"}, ensure_ascii=False)
 
-    rows = [
-        {"direction": t.get("TripHeadSign", "未知方向"),
-         "first":     t.get("FirstTrainTime", "N/A"),
-         "last":      t.get("LastTrainTime", "N/A")}
-        for t in timetable
-    ]
-    msg_lines = [f"「{station_name}」首末班車："]
-    for r in rows:
-        msg_lines.append(f"往 {r['direction']} → 首班 {r['first']}，末班 {r['last']}")
+    try:
+        timetable_data = first_last_train_time_service.get_timetable_for_station(station_name)
+        
+        if timetable_data:
+            current_hour = datetime.now().hour
 
-    return json.dumps({"station": station_name, "timetable": rows,
-                       "message": "\n".join(msg_lines)}, ensure_ascii=False)
+            # --- 訊息美化與個人化 ---
+
+            # 隨機選擇開場白，增加變化性
+            openings = [
+                f"🎉 嗨嗨！我來幫您看看「{station_name}」站的班次喔！💪",
+                f"💖 好的，馬上為您查詢「{station_name}」站的首末班車時間～ 請稍等一下下！",
+                f"✨ 這是「{station_name}」站的詳細時刻表，希望對您有幫助喔！👇"
+            ]
+            message_parts = [random.choice(openings)]
+
+            # 根據當前時間給予不同情境的提醒
+            if current_hour >= 22 or current_hour <= 1:
+                message_parts.append("\n🌙 現在時間比較晚囉，要特別注意末班車時間，別錯過囉！🏃‍♀️")
+            elif 1 < current_hour <= 5:
+                message_parts.append("\n😴 夜深了～您是不是正在等第一班車呢？我來幫您看看！☀️")
+            else:
+                message_parts.append("\n😊 這是您要查詢的固定班次資訊喔！")
+
+
+            # 重新組織時刻表訊息，使其更清晰、更可愛
+            for entry in timetable_data:
+                destination = entry.get('destination_station', '未知終點站')
+                first_train = entry.get('first_train_time', 'N/A')
+                last_train = entry.get('last_train_time', 'N/A')
+                service_days = entry.get('service_days', '每日行駛') # 加入 service_days 顯示
+
+                # 簡化 service_days 顯示
+                # 請注意：此處假定 service_days 的格式為 '{,1,1,1,1,1,1,1,1}' 代表每日
+                # 如果您的實際數據有其他複雜的格式，可能需要更詳細的解析邏輯
+                if service_days == "'{,1,1,1,1,1,1,1,1}'" or "1,1,1,1,1,1,1" in service_days: # 增加更寬鬆的判斷
+                    service_days_display = "每日行駛"
+                else:
+                    service_days_display = "特定日行駛" # 如果有更複雜的服務日期，可能需要更詳細的解析
+
+                line_info = (
+                    f"\n➡️ 往 **{destination}** 方向：\n"
+                    f"   ⏰ 首班車： **{first_train}**\n"
+                    f"   ⏰ 末班車： **{last_train}**\n"
+                    f"   🗓️ 營運日： {service_days_display}"
+                )
+                message_parts.append(line_info)
+
+            # 隨機選擇結尾語
+            closings = [
+                "\n\n希望這個資訊對您有幫助，祝您旅途順利喔！🌈",
+                "\n\n出門在外要注意安全，希望您能順利搭上車！💖",
+                "\n\n如果時間有點趕，別忘了注意安全喔！有我在，您就安心搭車吧！�",
+                "\n\n請您再確認一下時間，快樂出門，平安回家喔！😊"
+            ]
+            message_parts.append(random.choice(closings))
+
+            # 保留官方的免責聲明，但用比較輕鬆的口吻
+            message_parts.append("\n\n(✨ 貼心提醒：首末班車時間可能因維修、國定假日或特殊情況而變動，建議您提早一點到車站，並以車站現場公告為準最保險喔！)")
+
+            # 使用兩個換行符號，讓最終呈現的訊息段落分明
+            return json.dumps({
+                "station": station_name, 
+                "timetable": timetable_data, 
+                "message": "\n".join(message_parts)
+            }, ensure_ascii=False)
+        
+        # 查無資料的可愛回覆
+        return json.dumps({"error": f"🧐 哎呀，好像沒有找到「{station_name}」站的首末班車資訊耶... \n這可能是因為該站目前沒有提供相關資料，或是資料正在更新中。\n您可以試著查詢其他車站，或是再確認一下站名是否有打錯喔！💡"}, ensure_ascii=False)
+    
+    except StationNotFoundError as e:
+        logger.warning(f"--- [工具(首末班車)] 查詢時發生錯誤: {e} ---")
+        # 找不到車站的可愛回覆
+        return json.dumps({"error": f"😕 抱歉，我目前找不到「{station_name}」這個車站的資料耶。\n請確認您輸入的站名是不是正確的，或試試看其他相近的名稱喔！🗺️"}, ensure_ascii=False)
+    except DataLoadError as e:
+        logger.error(f"--- [工具(首末班車)] 數據載入錯誤: {e} ---", exc_info=True)
+        # 資料載入失敗的可愛回覆
+        return json.dumps({"error": "😴 抱歉，時刻表資料庫好像正在午休，現在無法查詢！請您稍後再試一次喔！⏰"}, ensure_ascii=False)
+    except Exception as e:
+        logger.error(f"--- [工具(首末班車)] 查詢時發生未知錯誤: {e} ---", exc_info=True)
+        # 未知錯誤的可愛回覆
+        return json.dumps({"error": f"🤖 糟糕，查詢「{station_name}」站的時候，發生了一點點小問題，技術人員正在努力搶修中！請您稍後再試試看喔！🛠️"}, ensure_ascii=False)
 
 # ---------------------------------------------------------------------
 # 4. 出口資訊
@@ -247,7 +393,7 @@ def get_station_facilities(station_name: str) -> str:
     }, ensure_ascii=False)
 
 # ---------------------------------------------------------------------
-# 6. 遺失物智慧搜尋 (最終版)
+# 6. 遺失物智慧搜尋
 # ---------------------------------------------------------------------
 @tool
 def search_lost_and_found(
@@ -407,7 +553,7 @@ def search_lost_and_found(
 
 
 # ---------------------------------------------------------------------
-# 7. 捷運美食搜尋 (新功能)
+# 7. 捷運美食搜尋
 # ---------------------------------------------------------------------
 @tool
 def search_mrt_food(station_name: str, source_keyword: str | None = None) -> str:
@@ -662,20 +808,318 @@ def get_best_car_for_exit(station_name: str, direction: str, exit_number: int) -
         "message": message
     }, ensure_ascii=False)
 
-# ---------------------------------------------------------------------
-# 匯出工具清單
-# ---------------------------------------------------------------------
+@tool
+def get_realtime_mrt_info(station_name: str, destination: str) -> str:
+    """
+    【即時捷運到站專家】當使用者詢問「現在XX站往YY方向的車還有多久來」、「下一班車在哪裡」等關於
+    特定車站和方向的即時列車資訊時，請使用此工具。這個工具會提供最即時的列車位置和到站倒數。
+
+    Args:
+        station_name (str): 使用者詢問的**目前**所在車站名稱。
+        destination (str): 列車的行駛方向或終點站名稱。
+    """
+    logger.info(f"--- [工具(即時到站)] 查詢: {station_name} 往 {destination} 方向 ---")
+
+    tool_output = {} # 初始化工具回傳的結構化數據
+
+    try:
+        current_query_time = datetime.now()
+
+        realtime_mrt_service = service_registry.realtime_mrt_service
+        station_manager = service_registry.station_manager # 確保取得 station_manager
+
+        if not station_name or not destination:
+            raise ValueError("請提供您所在的車站和列車的目的地。")
+
+        # 解析並標準化使用者輸入的站名
+        resolved_station_name = realtime_mrt_service.search_station(station_name)
+        resolved_destination_name = realtime_mrt_service.search_station(destination)
+
+        if not resolved_station_name:
+            raise StationNotFoundError(f"我無法識別車站「{station_name}」。")
+        if not resolved_destination_name:
+            raise StationNotFoundError(f"我無法識別目的地「{destination}」。")
+
+        # 獲取用於顯示給使用者的官方完整名稱
+        official_station_display_name = station_manager.get_official_unnormalized_name(resolved_station_name)
+        official_destination_display_name = station_manager.get_official_unnormalized_name(resolved_destination_name)
+
+        # 推導出真正的列車終點站 (可能有多個，取第一個作為主要方向顯示)
+        target_terminus_list = realtime_mrt_service.resolve_train_terminus(
+            resolved_station_name, resolved_destination_name
+        )
+
+        if not target_terminus_list:
+            tool_output = {
+                "status": "No train found",
+                "reason": "invalid_direction",
+                "query_station": official_station_display_name,
+                "query_destination": official_destination_display_name,
+                "message_hint": f"從「{official_station_display_name}」站沒有往「{official_destination_display_name}」方向的直達列車。",
+                "possible_directions": [station_manager.get_official_unnormalized_name(key) for key in station_manager.get_terminal_stations_for(resolved_station_name)]
+            }
+            return json.dumps(tool_output, ensure_ascii=False)
+
+
+        candidate_trains = realtime_mrt_service.get_next_train_info(
+            target_station_official_name=resolved_station_name,
+            target_direction_normalized_list=target_terminus_list
+        )
+
+        if not candidate_trains:
+            tool_output = {
+                "status": "No train found",
+                "reason": "no_realtime_data",
+                "query_station": official_station_display_name,
+                "query_destination": official_destination_display_name,
+                "message_hint": f"目前沒有找到往「{official_destination_display_name}」方向的列車資訊。"
+            }
+        else:
+            next_train_info = []
+            for train in candidate_trains[:3]: # 只取最近的3班車
+                countdown_str = train.get('CountDown', 'N/A')
+                current_train_station = train.get('StationName', '未知車站')
+
+                eta_seconds = None
+                arrival_time_str = None
+                
+                if countdown_str == '列車進站':
+                    eta_seconds = 0
+                    arrival_time_str = (current_query_time).strftime('%H:%M') # 列車進站，視為立即到達
+                else:
+                    total_minutes = 0
+                    # 嘗試解析 "X分鐘Y秒"
+                    match_seconds = re.search(r'(\d+)\s*分鐘\s*(\d+)\s*秒', countdown_str)
+                    # 嘗試解析 "X分鐘"
+                    match_minutes = re.search(r'(\d+)\s*分鐘', countdown_str)
+                    # 嘗試解析純數字 (例如： "5")
+                    match_single_number = re.search(r'^(\d+)$', countdown_str.strip())
+
+                    if match_seconds:
+                        minutes = int(match_seconds.group(1))
+                        seconds = int(match_seconds.group(2))
+                        eta_seconds = minutes * 60 + seconds
+                    elif match_minutes:
+                        minutes = int(match_minutes.group(1))
+                        eta_seconds = minutes * 60
+                    elif match_single_number:
+                        minutes = int(match_single_number.group(1))
+                        eta_seconds = minutes * 60
+                    
+                    if eta_seconds is not None:
+                        estimated_arrival_datetime = current_query_time + timedelta(seconds=eta_seconds)
+                        arrival_time_str = estimated_arrival_datetime.strftime('%H:%M')
+                    else:
+                        # 如果無法解析，則使用原始倒數字串
+                        countdown_str = countdown_str # 保持原始字串
+
+                next_train_info.append({
+                    "current_location": current_train_station,
+                    "countdown_raw": countdown_str, # 原始倒數字串
+                    "eta_seconds": eta_seconds, # 精確到秒的倒數
+                    "arrival_time": arrival_time_str # 預計抵達的實際時間點 (HH:MM)
+                })
+
+            tool_output = {
+                "status": "Success",
+                "query_time": current_query_time.strftime('%H點%M分'),
+                "query_station": official_station_display_name,
+                "query_destination": official_destination_display_name,
+                "train_terminus": station_manager.get_official_unnormalized_name(target_terminus_list[0]), # 確保是顯示名稱
+                "next_trains": next_train_info,
+                "suggestion": {
+                    "text": "想知道這班車會不會很擠嗎？您可以問我「[車站名稱] 往 [目的地] 擠不擠」",
+                    "example_query": f"{official_station_display_name} 往 {official_destination_display_name} 擠不擠"
+                }
+            }
+
+        return json.dumps(tool_output, ensure_ascii=False)
+
+    except StationNotFoundError as e:
+        tool_output = {
+            "status": "Error",
+            "error_type": "Station Not Found",
+            "message": f"😕 抱歉，我好像找不到您說的車站或目的地耶。錯誤訊息：{e}"
+        }
+        logger.warning(f"--- [工具(即時到站)] 查無車站或目的地: {e} ---")
+        return json.dumps(tool_output, ensure_ascii=False)
+    except ValueError as e:
+        tool_output = {
+            "status": "Error",
+            "error_type": "Invalid Parameter/Direction",
+            "message": f"🤔 哎呀，您提供的資訊好像有點問題，或是該方向沒有直達列車。錯誤訊息：{e}"
+        }
+        logger.warning(f"--- [工具(即時到站)] 參數錯誤或方向無效: {e} ---")
+        return json.dumps(tool_output, ensure_ascii=False)
+    except Exception as e:
+        tool_output = {
+            "status": "Error",
+            "error_type": "Unknown Error",
+            "message": "🤖 糟糕，我的捷運查詢系統好像出了一點小狀況，請稍後再試一次喔！"
+        }
+        logger.error(f"--- [工具(即時到站)] 發生未知錯誤: {e} ---", exc_info=True)
+        return json.dumps(tool_output, ensure_ascii=False)
+
+
+
+@tool
+def predict_train_congestion(station_name: str, direction: str, datetime_str: Optional[str] = None) -> str:
+    """
+    【捷運擁擠度預測專家】當使用者詢問「XX站擠不擠」、「YY站往ZZ方向人多嗎」這類關於車廂擁擠度的問題時，請使用此工具。
+    它可以預測當前或未來特定時間的車廂擁擠程度。此工具常與 get_realtime_mrt_info 工具一起使用，來回答關於「車上人多不多」這類複合問題。
+
+    Args:
+        station_name (str): 預測的車站名稱。
+        direction (str): 預測的行駛方向或終點站名稱。
+        datetime_str (str, optional): 預測的日期和時間，可以是標準格式 `YYYY-MM-DD HH:MM`，
+        也可以是自然語言表達，例如「明天早上八點」或「下一班車」。若未提供此參數，
+        工具將自動使用當前時間進行預測。
+    """
+    logger.info(f"--- [工具(預測)] 原始查詢: {station_name} 往 {direction} 方向, 時間: {datetime_str} ---")
+
+    if not station_name or not direction:
+        return json.dumps({
+            "error": "Missing parameters",
+            "message": "🤔 哎呀，我需要知道您想查詢的「車站」和「方向」才能為您預測喔！" # 人性化錯誤訊息
+        }, ensure_ascii=False)
+
+    target_datetime = None
+    if datetime_str:
+        # 增加對口語化時間的處理
+        if datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"]:
+            target_datetime = datetime.now()
+        else:
+            # 使用 dateparser 來解析自然語言時間字串
+            target_datetime = dateparser.parse(
+                datetime_str,
+                settings={'PREFER_DATES_FROM': 'future', 'TIMEZONE': 'Asia/Taipei'}
+            )
+    
+    if not target_datetime:
+        # 如果使用者沒有提供時間，或 dateparser 無法解析，則使用當前時間
+        target_datetime = datetime.now()
+        logger.info("--- 未提供時間或無法解析，自動設定為當前時間 ---")
+
+    # --- 關鍵防禦：檢查解析出來的日期是否過於久遠，這通常代表 LLM 的幻覺或解析錯誤 ---
+    now = datetime.now()
+    if target_datetime > now + timedelta(days=365) or target_datetime < now - timedelta(days=1):
+        logger.warning(f"--- ⚠️ 檢測到不合理的日期: {target_datetime.isoformat()}，可能為 LLM 幻覺。---")
+        return json.dumps({
+            "error": "Invalid time period",
+            "message": f"📅 抱歉，您提供的日期 `{datetime_str}` 看起來有點太遙遠了。我只能預測一年內的擁擠度喔！今天的日期是 `{now.strftime('%Y-%m-%d')}`。" # 人性化錯誤訊息
+        }, ensure_ascii=False)
+        
+    # --- 別名解析 ---
+    # 確保 station_manager 已透過 service_registry 取得
+    station_manager = service_registry.station_manager 
+    congestion_predictor = service_registry.congestion_predictor
+
+    # 1. 解析並標準化使用者輸入的車站和方向名稱
+    resolved_station_name_key = station_manager.resolve_station_alias(station_name)
+    resolved_direction_key = station_manager.resolve_station_alias(direction)
+
+    # 取得用於顯示給使用者的官方完整名稱
+    official_station_display_name = station_manager.get_official_unnormalized_name(resolved_station_name_key)
+    official_direction_display_name = station_manager.get_official_unnormalized_name(resolved_direction_key)
+
+    # 2. 獲取該出發站所有可能的終點站 (已標準化為內部鍵)
+    possible_terminals_keys = station_manager.get_terminal_stations_for(resolved_station_name_key)
+    
+    # 檢查出發站是否存在或有路線
+    if not possible_terminals_keys:
+        return json.dumps({
+            "error": "Station not found or no routes",
+            "message": f"😕 抱歉，我好像找不到「{station_name}」這個車站的資料，或是它沒有可查詢的路線耶。請問您有輸入正確的車站名稱嗎？" # 人性化錯誤訊息
+        }, ensure_ascii=False)
+
+    # 3. 驗證使用者查詢的方向是否為合法終點站
+    if resolved_direction_key not in possible_terminals_keys:
+        # 將可能的終點站內部鍵轉換為顯示名稱，以便提供友善提示
+        display_terminals = [station_manager.get_official_unnormalized_name(key) for key in possible_terminals_keys]
+        
+        # 判斷是否因為方向名稱本身有問題，還是該站點根本沒有此方向
+        error_message = f"🧭 哎呀！從「{official_station_display_name}」站，好像沒有直接開往「{direction}」的車耶。" # 人性化錯誤訊息
+        if display_terminals:
+            error_message += f"\n\n您可以試試看往以下幾個方向查詢：\n✨ **{'、'.join(display_terminals)}**"
+        else:
+            error_message += f"\n\n這個車站似乎沒有明確的行駛方向資訊。"
+
+        return json.dumps({
+            "error": "Invalid direction",
+            "message": error_message
+        }, ensure_ascii=False)
+
+    # 執行擁擠度預測
+    prediction_result = congestion_predictor.predict_for_station(
+        station_name=official_station_display_name, # 使用官方顯示名稱進行預測
+        direction=official_direction_display_name,   # 使用官方顯示名稱進行預測
+        target_datetime=target_datetime
+    )
+
+    if "error" in prediction_result:
+        return json.dumps({"message": f"😥 抱歉，預測時發生了一點小問題：{prediction_result['error']}"}, ensure_ascii=False) # 人性化錯誤訊息
+
+    congestion_data = prediction_result.get("congestion_by_car", [])
+    
+    if congestion_data:
+        time_display = target_datetime.strftime('%Y年%m月%d日 %H點%M分')
+        if datetime_str and datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"]:
+            time_display = "現在"
+                
+        # 保持原本的輸出格式：開場白 + 列車擁擠度列表
+        message_parts = [
+            f"根據預測，在 {time_display} 往「{official_direction_display_name}」方向的列車擁擠度如下：",
+            "---"
+        ]
+        
+        for car in congestion_data:
+            car_number = car['car_number']
+            congestion_level = car['congestion_level']
+            emoji_text = CONGESTION_EMOJI_MAP.get(congestion_level, "❔")
+            message_parts.append(f"第 {car_number} 節車廂：{emoji_text}")
+        
+        # 從這裡開始加入人性化的總結語句
+        max_congestion = max(c['congestion_level'] for c in congestion_data) if congestion_data else 0
+        if max_congestion >= 3: # 假設 3 代表中等擁擠，4 代表非常擁擠
+            message_parts.append("\n💡 **貼心提醒**：部分車廂可能人潮較多，建議您往較空曠的車廂移動喔！")
+        elif max_congestion == 2: # 假設 2 代表普通
+            message_parts.append("\n😊 車廂狀況還不錯，人潮普通，可以輕鬆搭乘！")
+        else: # 假設 0, 1 代表空曠
+            message_parts.append("\n🎉 太棒了！看起來車廂非常空曠，祝您有趟愉快的旅程！")
+            
+        final_message = "\n".join(message_parts)
+    else:
+        final_message = f"😥 抱歉，目前暫時無法取得「{official_station_display_name}」往「{official_direction_display_name}」方向在此時段的擁擠度預測資料。您可以試試看其他時間或目的地喔！" # 人性化無資料訊息
+
+    response = {"message": final_message}
+    return json.dumps(response, ensure_ascii=False)
+
+
+# =====================================================================
+# 最終工具列表 (Final Tool List)
+# =====================================================================
+# 匯集 finyster 和 alan 兩個分支的所有工具，打造功能全面的 Agent。
 all_tools = [
+    # 路徑與票務
     plan_route,
     get_mrt_fare,
+    get_detailed_fare_info,
+    # 即時營運
     get_first_last_train_time,
+    get_realtime_mrt_info,
+    predict_train_congestion,
+    # 車站資訊
     get_station_exit_info,
     get_station_facilities,
+    get_best_car_for_exit,
+    # 生活與探索
     search_lost_and_found,
     search_mrt_food,
     list_available_food_maps,
+    # 系統資訊
     get_metro_line_info,
     list_all_metro_lines,
-    list_all_stations, 
-    get_best_car_for_exit,
+    list_all_stations,
 ]
+
+logger.info(f"--- [Tools] 總共 {len(all_tools)} 個工具已成功註冊並準備就緒。 ---")

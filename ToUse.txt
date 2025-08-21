@@ -40,3 +40,120 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 # 5) 解除
 deactivate
+
+
+
+
+
+
+
+
+
+
+(base) icps@icps-System-Product-Name:~/henrylin$ cd finalMetroPet/
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet$ git clone https://github.com/finyster/metroPetAgent.git
+Cloning into 'metroPetAgent'...
+remote: Enumerating objects: 188, done.
+remote: Counting objects: 100% (188/188), done.
+remote: Compressing objects: 100% (127/127), done.
+remote: Total 188 (delta 90), reused 150 (delta 52), pack-reused 0 (from 0)
+Receiving objects: 100% (188/188), 10.59 MiB | 9.22 MiB/s, done.
+Resolving deltas: 100% (90/90), done.
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet$ cd metroPetAgent
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git remote add alan https://github.com/Alan52254/MetroPet.git
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git remote -v
+alan    https://github.com/Alan52254/MetroPet.git (fetch)
+alan    https://github.com/Alan52254/MetroPet.git (push)
+origin  https://github.com/finyster/metroPetAgent.git (fetch)
+origin  https://github.com/finyster/metroPetAgent.git (push)
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git fetch alan
+remote: Enumerating objects: 345, done.
+remote: Counting objects: 100% (345/345), done.
+remote: Compressing objects: 100% (242/242), done.
+remote: Total 345 (delta 146), reused 289 (delta 90), pack-reused 0 (from 0)
+Receiving objects: 100% (345/345), 12.24 MiB | 2.03 MiB/s, done.
+Resolving deltas: 100% (146/146), done.
+From https://github.com/Alan52254/MetroPet
+ * [new branch]      feature/recovered-soap-api -> alan/feature/recovered-soap-api
+ * [new branch]      main                       -> alan/main
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git checkout -b merge-alan-feature
+Switched to a new branch 'merge-alan-feature'
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git merge alan/main
+fatal: refusing to merge unrelated histories
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ git merge alan/main --allow-unrelated-histories
+warning: Cannot merge binary files: .gitignore (HEAD vs. alan/main)
+Auto-merging .gitignore
+CONFLICT (add/add): Merge conflict in .gitignore
+Auto-merging agent/agent.py
+CONFLICT (add/add): Merge conflict in agent/agent.py
+Auto-merging agent/function_tools.py
+CONFLICT (add/add): Merge conflict in agent/function_tools.py
+Auto-merging app/main.py
+CONFLICT (add/add): Merge conflict in app/main.py
+Auto-merging build_database.py
+CONFLICT (add/add): Merge conflict in build_database.py
+Auto-merging config.py
+CONFLICT (add/add): Merge conflict in config.py
+Auto-merging congestion_collecter.py
+CONFLICT (add/add): Merge conflict in congestion_collecter.py
+Auto-merging data/high_capacity_congestion.csv
+CONFLICT (add/add): Merge conflict in data/high_capacity_congestion.csv
+Auto-merging data/mrt_station_exits.json
+CONFLICT (add/add): Merge conflict in data/mrt_station_exits.json
+Auto-merging data/mrt_station_facilities.json
+CONFLICT (add/add): Merge conflict in data/mrt_station_facilities.json
+Auto-merging data/mrt_station_info.json
+CONFLICT (add/add): Merge conflict in data/mrt_station_info.json
+Auto-merging data/wenhu_congestion.csv
+CONFLICT (add/add): Merge conflict in data/wenhu_congestion.csv
+Auto-merging model/high_capacity_congestion_model.json
+CONFLICT (add/add): Merge conflict in model/high_capacity_congestion_model.json
+warning: Cannot merge binary files: model/high_capacity_encoder.joblib (HEAD vs. alan/main)
+Auto-merging model/high_capacity_encoder.joblib
+CONFLICT (add/add): Merge conflict in model/high_capacity_encoder.joblib
+Auto-merging model/high_capacity_feature_columns.csv
+CONFLICT (add/add): Merge conflict in model/high_capacity_feature_columns.csv
+Auto-merging model/model_trainer.py
+CONFLICT (add/add): Merge conflict in model/model_trainer.py
+Auto-merging model/wenhu_congestion_model.json
+CONFLICT (add/add): Merge conflict in model/wenhu_congestion_model.json
+warning: Cannot merge binary files: model/wenhu_encoder.joblib (HEAD vs. alan/main)
+Auto-merging model/wenhu_encoder.joblib
+CONFLICT (add/add): Merge conflict in model/wenhu_encoder.joblib
+Auto-merging model/wenhu_feature_columns.csv
+CONFLICT (add/add): Merge conflict in model/wenhu_feature_columns.csv
+Auto-merging requirements.txt
+CONFLICT (add/add): Merge conflict in requirements.txt
+Auto-merging services/__init__.py
+CONFLICT (add/add): Merge conflict in services/__init__.py
+Auto-merging services/fare_service.py
+CONFLICT (add/add): Merge conflict in services/fare_service.py
+Auto-merging services/local_data_service.py
+CONFLICT (add/add): Merge conflict in services/local_data_service.py
+Auto-merging services/metro_soap_service.py
+CONFLICT (add/add): Merge conflict in services/metro_soap_service.py
+Auto-merging services/prediction_service.py
+CONFLICT (add/add): Merge conflict in services/prediction_service.py
+Auto-merging services/routing_service.py
+CONFLICT (add/add): Merge conflict in services/routing_service.py
+Auto-merging services/station_service.py
+CONFLICT (add/add): Merge conflict in services/station_service.py
+Auto-merging services/tdx_service.py
+CONFLICT (add/add): Merge conflict in services/tdx_service.py
+Auto-merging templates/index.html
+CONFLICT (add/add): Merge conflict in templates/index.html
+Auto-merging utils/exceptions.py
+CONFLICT (add/add): Merge conflict in utils/exceptions.py
+Auto-merging utils/station_name_normalizer.py
+CONFLICT (add/add): Merge conflict in utils/station_name_normalizer.py
+Automatic merge failed; fix conflicts and then commit the result.
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet/metroPetAgent$ cd ..
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet$ git clone https://github.com/Alan52254/MetroPet.git
+Cloning into 'MetroPet'...
+remote: Enumerating objects: 345, done.
+remote: Counting objects: 100% (345/345), done.
+remote: Compressing objects: 100% (242/242), done.
+remote: Total 345 (delta 146), reused 289 (delta 90), pack-reused 0 (from 0)
+Receiving objects: 100% (345/345), 12.24 MiB | 17.93 MiB/s, done.
+Resolving deltas: 100% (146/146), done.
+(base) icps@icps-System-Product-Name:~/henrylin/finalMetroPet$ 

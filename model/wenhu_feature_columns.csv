@@ -1,7 +1,10 @@
 feature
 hour
+minute
 day_of_week
 is_weekend
+is_peak_hour
+is_transfer_station
 car_number
 lag_5min_congestion
 lag_1hr_congestion

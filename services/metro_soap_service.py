@@ -337,7 +337,7 @@ class MetroSoapService:
 </GetRecommandRoute>
 </soap:Body>
 </soap:Envelope>"""
-        resp = self._request("RouteControl", '"http://tempuri.org/GetRecommandRoute"', body)
+        resp = self._send_soap_request("RouteControl", '"http://tempuri.org/GetRecommandRoute"', body)
         if not resp:
             return None
 
@@ -378,7 +378,7 @@ class MetroSoapService:
 <GetStationList xmlns="http://tempuri.org/" />
 </soap:Body>
 </soap:Envelope>"""
-        resp = self._request("RouteControl", '"http://tempuri.org/GetStationList"', body)
+        resp = self._send_soap_request("RouteControl", '"http://tempuri.org/GetStationList"', body)
         if not resp:
             return None
         # API 回傳純 JSON 字串（首行）
@@ -403,16 +403,26 @@ class MetroSoapService:
 </getTrackInfo>
 </soap:Body>
 </soap:Envelope>"""
-        resp = self._request("TrackInfo", '"http://tempuri.org/getTrackInfo"', body)
+        resp = self._send_soap_request("TrackInfo", '"http://tempuri.org/getTrackInfo"', body)
         if not resp:
             return None
         # XML → <getTrackInfoResult>[JSON]</getTrackInfoResult>
-        soup = BeautifulSoup(resp.content, "xml")
-        txt = self._bs_get(soup, "getTrackInfoResult")
+        # 改用更穩健的正則表達式來直接從回應文字中提取 JSON
         try:
-            return json.loads(txt) if txt else None
-        except json.JSONDecodeError:
-            print("⚠️ track info parse failed")
+            response_text = resp.text.strip()
+            # 這個 API 的回應格式很不穩定，直接用正則表達式抓取 JSON 陣列是最可靠的方式
+            match = re.search(r'(\[.+\])', response_text, re.DOTALL)
+            if match:
+                json_str = match.group(1)
+                return json.loads(json_str)
+            else:
+                logger.warning("⚠️ 在 get_track_info 的回應中找不到 JSON 陣列。")
+                return None
+        except json.JSONDecodeError as e:
+            logger.error(f"❌ 解析 get_track_info 回應時發生 JSON 錯誤: {e}", exc_info=True)
+            return None
+        except Exception as e:
+            logger.error(f"❌ 處理 get_track_info 回應時發生未知錯誤: {e}", exc_info=True)
             return None
 
     # ------------------------------------------------------------------
@@ -443,7 +453,7 @@ class MetroSoapService:
 
     def get_parking_lot_all(self) -> list[dict] | None:
         body = self._parking_body("getParkingLot")
-        resp = self._request("ParkingLot", '"http://tempuri.org/getParkingLot"', body)
+        resp = self._send_soap_request("ParkingLot", '"http://tempuri.org/getParkingLot"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -456,7 +466,7 @@ class MetroSoapService:
 
     def get_parking_lot_by_station(self, station: str) -> list[dict] | None:
         body = self._parking_body("getParkingLotBySationName", station)
-        resp = self._request("ParkingLot", '"http://tempuri.org/getParkingLotBySationName"', body)
+        resp = self._send_soap_request("ParkingLot", '"http://tempuri.org/getParkingLotBySationName"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -495,7 +505,7 @@ class MetroSoapService:
 
     def get_youbike_all(self) -> list[dict] | None:
         body = self._youbike_body("getYourBikeNearBy")
-        resp = self._request("YouBike", '"http://tempuri.org/getYourBikeNearBy"', body)
+        resp = self._send_soap_request("YouBike", '"http://tempuri.org/getYourBikeNearBy"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -508,7 +518,7 @@ class MetroSoapService:
 
     def get_youbike_by_station(self, station: str) -> list[dict] | None:
         body = self._youbike_body("getYourBikeNearByName", station)
-        resp = self._request("YouBike", '"http://tempuri.org/getYourBikeNearByName"', body)
+        resp = self._send_soap_request("YouBike", '"http://tempuri.org/getYourBikeNearByName"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -547,7 +557,7 @@ class MetroSoapService:
 
     def get_locker_all(self) -> list[dict] | None:
         body = self._locker_body("getLockerMRT")
-        resp = self._request("Locker", '"http://tempuri.org/getLockerMRT"', body)
+        resp = self._send_soap_request("Locker", '"http://tempuri.org/getLockerMRT"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -560,7 +570,7 @@ class MetroSoapService:
 
     def get_locker_by_station(self, station: str) -> list[dict] | None:
         body = self._locker_body("getLockerMRTSationName", station)
-        resp = self._request("Locker", '"http://tempuri.org/getLockerMRTSationName"', body)
+        resp = self._send_soap_request("Locker", '"http://tempuri.org/getLockerMRTSationName"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")
@@ -585,7 +595,7 @@ class MetroSoapService:
 </getCarWeightByInfo>
 </soap:Body>
 </soap:Envelope>"""
-        resp = self._request("HighCapacity", '"http://tempuri.org/getCarWeightByInfo"', body)
+        resp = self._send_soap_request("HighCapacityCarWeight", '"http://tempuri.org/getCarWeightByInfo"', body)
         if not resp:
             return None
         soup = BeautifulSoup(resp.content, "xml")

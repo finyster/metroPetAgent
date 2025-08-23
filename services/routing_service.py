@@ -222,3 +222,32 @@ class RoutingManager:
             return ["抱歉，解析官方建議路線時發生錯誤。"]
             
         return self._generate_directions_from_ids(path_ids)
+    
+    def get_line_details(self, line_name: str) -> dict:
+        """根據路線名稱，回傳該路線的詳細資訊。"""
+        if line_name in self.line_details:
+            details = self.line_details[line_name]
+            station_names = [self.station_id_to_name.get(sid, sid) for sid in details['stations']]
+            return {
+                "line_name": line_name,
+                "color": details['color'],
+                "stations": station_names,
+                "message": f"【{line_name} ({details['color']})】沿線車站包含：{'、'.join(station_names)}。"
+            }
+        return {"error": f"找不到名為「{line_name}」的路線資訊。"}
+
+    def list_all_lines(self) -> dict:
+        """回傳所有已知的捷運路線列表。"""
+        if not self.line_details:
+            return {"error": "目前沒有可用的路線資訊。"}
+        
+        lines_summary = [
+            {"line_name": name, "color": details['color']}
+            for name, details in self.line_details.items()
+        ]
+        
+        return {
+            "count": len(lines_summary),
+            "lines": lines_summary,
+            "message": f"台北捷運目前有 {len(lines_summary)} 條主要路線。"
+        }

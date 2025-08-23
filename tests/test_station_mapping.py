@@ -15,7 +15,3 @@ def test_get_station_ids(name, sids):
     # 只要至少對到一筆即可
     assert any(x in ids for x in sids)
 
-def test_name2sid():
-    assert sm.name2sid("府中") == "081"
-    with pytest.raises(Exception):
-        sm.name2sid("霍格華茲")

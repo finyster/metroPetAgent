@@ -35,6 +35,7 @@ from .station_id_resolver import StationIdResolver
 from .prediction_service import CongestionPredictor
 from .first_last_train_time_service import FirstLastTrainTimeService
 from .realtime_mrt_service import RealtimeMRTService
+from .time_service import TimeService, time_service # 同時導入 TimeService 類別和 time_service 實例
 
 
 # ---------------------------------------------------------------------
@@ -74,6 +75,8 @@ class ServiceRegistry:
             self.station_manager = station_manager
             self.tdx_api = tdx_api
             self.metro_soap_api = metro_soap_api
+            self.time_service = time_service # ✨ 2. 將 time_service 加入到註冊中心
+
             
             # --- 步驟 2: 初始化 AI/輔助工具型服務 (依賴基礎服務) ---
             self.vector_search_service = vector_search_service
@@ -126,6 +129,7 @@ class ServiceRegistry:
     def get_vector_search_service(self): return self.vector_search_service
     def get_id_converter_service(self): return self.id_converter_service
     def get_station_id_resolver(self) -> StationIdResolver: return self.station_id_resolver
+    def get_time_service(self) -> TimeService: return self.time_service
 
 # ---------------------------------------------------------------------
 # 4. 全域單例 (Global Singleton)

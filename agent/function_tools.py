@@ -63,9 +63,16 @@ id_converter = service_registry.id_converter_service
 congestion_predictor = service_registry.get_congestion_predictor()
 first_last_train_time_service = service_registry.get_first_last_train_time_service()
 realtime_mrt_service = service_registry.get_realtime_mrt_service()
+time_service = service_registry.get_time_service() # ✨ 1. 獲取 TimeService 實例
+
 
 # Emoji 對應表，用於美化擁擠度輸出
-CONGESTION_EMOJI_MAP = {1: "😊 舒適", 2: "🤔 正常", 3: "😥 略多", 4: "😡 擁擠"}
+CONGESTION_EMOJI_MAP = {
+    1: "😊 空間舒適",
+    2: "🤔 人潮普通",
+    3: "😥 人潮略多",
+    4: "😡 車廂擁擠"
+}
 
 # =====================================================================
 # 4. Agent 工具定義 (Tool Definitions)
@@ -1042,6 +1049,11 @@ def predict_train_congestion(
 
     if not start_station_name or not end_station_name:
         return json.dumps({"message": "🤔 哎呀，我需要知道您的「起點」和「終點」才能為您預測喔！"}, ensure_ascii=False)
+    
+    # --- ✨ 2. 簡化時間解析邏輯 ---
+    # 直接呼叫 TimeService，一行搞定！
+    target_datetime = time_service.parse_datetime(datetime_str)
+    # --- ✨ 簡化結束 ---
 
     # --- ✨✨✨【核心修改：插入輕量化的 plan_route 邏輯】✨✨✨
     def _get_route_for_direction_only(start_name: str, end_name: str) -> Optional[Dict]:
@@ -1086,12 +1098,6 @@ def predict_train_congestion(
     if not match: return json.dumps({"error": "無法從搭乘指引中解析出目的地。"}, ensure_ascii=False)
     
     direction_hint = match.group(1)
-    
-    target_datetime = None
-    if datetime_str:
-        if datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"]: target_datetime = datetime.now()
-        else: target_datetime = dateparser.parse(datetime_str, settings={'PREFER_DATES_FROM': 'future', 'TIMEZONE': 'Asia/Taipei'})
-    if not target_datetime: target_datetime = datetime.now()
 
     try:
         resolved_start_name = station_manager.resolve_station_alias(start_station_name)

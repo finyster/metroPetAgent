@@ -36,3 +36,4 @@ langchain-community
 # 確保 XML 解析和資料處理無誤
 
 torch>=2.1
+holidays

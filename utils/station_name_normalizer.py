@@ -1,32 +1,27 @@
-# utils/station_name_normalizer.py
-"""
-======================================================================
-|           MetroPet AI Agent - Station Name Normalizer            |
-|                   (採用 finyster 分支的純函式架構)                 |
-======================================================================
-此檔案提供一個純粹的站點名稱標準化工具函式。
-它的唯一職責是接收一個字串，並對其進行一系列的清理和格式化，
-以便後續的服務 (如 StationManager) 能夠進行精確的資料庫比對。
-"""
-
+# utils/station_name_normalizer.py (最終修正版)
 import re
 
 def normalize_station_name(name: str) -> str:
     """
-    一個純粹的站點名稱標準化工具。
-    功能：轉小寫、移除頭尾空白、移除括號內容、移除'站'字尾、繁轉簡。
-    它只負責處理字串，不進行任何查核。
+    一個純粹的站名標準化工具 v2.1。
+    新增了對「台北車」的自動修正和對「台北車站」的特殊處理。
     """
     if not isinstance(name, str):
         return ""
     
-    # 轉小寫、移除頭尾空白、繁轉簡
     normalized_input = name.lower().strip().replace("臺", "台")
+
+    # ✨ 核心修正一：如果輸入是「台北車」，直接修正為「台北車站」
+    if normalized_input == "台北車":
+        return "台北車站"
+        
+    # ✨ 核心修正二：如果名稱包含 "台北車站"，則直接回傳標準化的全名
+    if "台北車站" in normalized_input:
+        return "台北車站"
     
-    # 移除括號及其內容
+    # 對於其他站名，才執行後續的標準化流程
     normalized_input = re.sub(r"[\(（].*?[\)）]", "", normalized_input).strip()
     
-    # 【✨核心修正✨】使用更安全的方式移除字尾 "站"
     if normalized_input.endswith("站"):
         normalized_input = normalized_input.removesuffix("站")
         

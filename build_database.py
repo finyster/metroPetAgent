@@ -23,18 +23,27 @@ import config
 from services.tdx_service import tdx_api
 from services.metro_soap_service import metro_soap_api
 
-# 為了避免循環依賴和簡化，我們在這裡重新定義一個與 StationManager 內部邏輯相同的 normalize_name 函數。
+# ✨ 核心修正：新增對「台北車」的自動修正邏輯
 def normalize_name(name: str) -> str:
-    """標準化站點名稱：小寫、移除括號內容、移除「站」、繁轉簡"""
+    """標準化站點名稱 v2.1：新增對「台北車」的自動修正。"""
     if not name: return ""
-    name = name.lower().strip().replace("臺", "台")
-    name = re.sub(r"[\(（].*?[\)）]", "", name).strip()
+    normalized_input = name.lower().strip().replace("臺", "台")
+
+    # 規則一：如果輸入是「台北車」，直接修正為「台北車站」
+    if normalized_input == "台北車":
+        return "台北車站"
     
-    # --- 【✨核心修正✨】使用更安全的方式移除字尾 ---
-    if name.endswith("站"):
-        name = name.removesuffix("站")
+    # 規則二：如果輸入包含「台北車站」，也直接回傳標準化全名
+    if "台北車站" in normalized_input:
+        return "台北車站"
+    
+    # 對於其他站名，才執行後續的標準化流程
+    normalized_input = re.sub(r"[\(（].*?[\)）]", "", normalized_input).strip()
+    
+    if normalized_input.endswith("站"):
+        normalized_input = normalized_input.removesuffix("站")
         
-    return name
+    return normalized_input
 
 # --- ✨【核心修改：以本地 SID Map 為主的全新函式】✨ ---
 def build_station_database():

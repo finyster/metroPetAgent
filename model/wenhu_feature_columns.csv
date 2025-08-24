@@ -2,8 +2,13 @@ feature
 hour
 minute
 day_of_week
+month
+year
 is_weekend
+is_morning_peak
+is_evening_peak
 is_peak_hour
+is_holiday
 is_transfer_station
 car_number
 lag_5min_congestion

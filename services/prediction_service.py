@@ -1,5 +1,3 @@
-# services/prediction_service.py
-
 import pandas as pd
 import xgboost as xgb
 import joblib
@@ -9,6 +7,9 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, Tuple
 import dateparser
+
+# --- 【新增導入】 ---
+import holidays # 導入 holidays 函式庫
 
 # --- 路徑設置 ---
 import sys
@@ -22,7 +23,7 @@ if PROJECT_ROOT not in sys.path:
 
 from services.station_service import StationManager
 from services.metro_soap_service import metro_soap_api
-import config
+import config # 確保 config 檔案存在且可被導入
 
 # --- 配置日誌 ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,6 +37,8 @@ class CongestionPredictor:
         self.encoders: Dict[str, any] = {}
         self.scalers: Dict[str, any] = {}
         self.feature_columns: Dict[str, list] = {}
+        # --- 【新增】初始化台灣假日物件 ---
+        self.tw_holidays = holidays.TW() # 初始化台灣假日物件
         self.is_ready = self._load_all_models()
 
         if self.is_ready:
@@ -61,6 +64,7 @@ class CongestionPredictor:
                 self.models[line_type].load_model(model_path)
                 self.encoders[line_type] = joblib.load(encoder_path)
                 self.scalers[line_type] = joblib.load(scaler_path)
+                # 您的 feature_columns.csv 假設有 'feature' 標頭
                 self.feature_columns[line_type] = pd.read_csv(features_path)['feature'].tolist()
                 logger.info(f"--- ✅ 已成功從 '{MODEL_DIR}' 載入 {line_type} 模型。 ---")
             except Exception as e:
@@ -81,6 +85,7 @@ class CongestionPredictor:
     def _create_prediction_features(self, station_id: str, line_direction_cid: int, line_type: str, target_datetime: datetime) -> pd.DataFrame:
         """
         根據指定的日期時間，創建模型所需的特徵。
+        --- 【核心修正】此函式現在會生成與新版 model_trainer.py 完全一致的特徵集。 ---
         """
         with open(os.path.join(DATA_DIR, 'mrt_station_info.json'), 'r', encoding='utf-8') as f:
             station_info = json.load(f)
@@ -102,8 +107,8 @@ class CongestionPredictor:
         
         # 模擬夜間或離峰時段的擁擠度
         if target_datetime.hour in [21, 22, 23, 0, 1, 2, 3, 4, 5]:
-             lag_5min_congestion = 0.5
-             lag_1hr_congestion = 0.5
+            lag_5min_congestion = 0.5
+            lag_1hr_congestion = 0.5
         
         num_cars = 4 if line_type == 'wenhu' else 6
         records = []
@@ -114,8 +119,13 @@ class CongestionPredictor:
                 'hour': target_datetime.hour,
                 'minute': target_datetime.minute,
                 'day_of_week': target_datetime.weekday(),
+                'month': target_datetime.month, # 【新增】
+                'year': target_datetime.year,   # 【新增】
                 'is_weekend': int(target_datetime.weekday() >= 5),
+                'is_morning_peak': int(7 <= target_datetime.hour <= 9), # 【新增】
+                'is_evening_peak': int(17 <= target_datetime.hour <= 19), # 【新增】
                 'is_peak_hour': int(target_datetime.hour in [7, 8, 17, 18, 19]),
+                'is_holiday': int(target_datetime.date() in self.tw_holidays), # 【新增】
                 'is_transfer_station': int(station_id in transfer_stations),
                 'car_number': car_num,
                 'lag_5min_congestion': lag_5min_congestion,
@@ -129,9 +139,11 @@ class CongestionPredictor:
         encoded_data = encoder.transform(df_raw[categorical_features])
         encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(categorical_features))
         
+        # --- 【修正】確保所有新特徵都被包含在數值特徵列表中 ---
         numeric_features = [
-            'hour', 'minute', 'day_of_week', 'is_weekend', 'is_peak_hour', 'is_transfer_station',
-            'car_number', 'lag_5min_congestion', 'lag_1hr_congestion'
+            'hour', 'minute', 'day_of_week', 'month', 'year', 'is_weekend', 
+            'is_morning_peak', 'is_evening_peak', 'is_peak_hour', 'is_holiday', 
+            'is_transfer_station', 'car_number', 'lag_5min_congestion', 'lag_1hr_congestion'
         ]
         
         final_df = pd.concat([df_raw[numeric_features].reset_index(drop=True), encoded_df.reset_index(drop=True)], axis=1)
@@ -139,6 +151,7 @@ class CongestionPredictor:
         scaler = self.scalers[line_type]
         final_df[numeric_features] = scaler.transform(final_df[numeric_features])
         
+        # 使用訓練時儲存的欄位順序，確保完全一致
         final_df = final_df.reindex(columns=self.feature_columns[line_type], fill_value=0)
         
         return final_df
@@ -155,6 +168,8 @@ class CongestionPredictor:
         if not line_type:
             return {"error": f"無法識別車站 '{station_name}'，請確認站名是否正確。"}
             
+        # 注意：這裡的 direction_map 應該與您在 station_service 中定義的方向一致
+        # 為了更精準，可能需要從 station_manager 獲取該站點的有效方向 ID
         direction_map = {"上行": 1, "往南港展覽館": 1, "往動物園": 1, "往迴龍": 1, "往蘆洲": 1, "往淡水":1, "往北投":1, "下行": 2, "往頂埔": 2, "往象山": 2, "往大安":2, "往南勢角":2, "往新店": 2, "往台電大樓":2, "往板橋":2}
         line_direction_cid = direction_map.get(direction, 1)
 
@@ -174,8 +189,9 @@ class CongestionPredictor:
                 # 例如，如果預測時間在尖峰時段，即使模型預測舒適，也將其調整為正常
                 level = int(pred_class)
                 
+                # 簡單的後處理邏輯，確保尖峰時段至少為正常
                 if target_datetime.weekday() < 5 and target_datetime.hour in [7, 8, 17, 18]:
-                     if level == 0: level = 1 # 尖峰時段至少是正常
+                    if level == 0: level = 1 # 尖峰時段至少是正常
                 
                 results.append({
                     "car_number": i + 1,
@@ -203,7 +219,9 @@ class CongestionPredictor:
 
         logger.info(f"--- 🚀 正在從 Metro API 獲取即時列車資訊以查找車站 '{station_name}' 往 '{direction}' 方向 ---")
         try:
-            all_train_info = metro_soap_api.get_realtime_track_info()
+            # 確保 metro_soap_api.get_realtime_track_info() 能夠正確調用
+            # 如果這個函數需要參數，請根據實際情況傳遞
+            all_train_info = metro_soap_api.get_realtime_track_info() 
         except Exception as e:
             logger.error(f"獲取即時列車資訊時發生錯誤: {e}", exc_info=True)
             return {"error": "無法從 Metro API 獲取即時列車資訊，請檢查服務連線。"}
@@ -216,7 +234,8 @@ class CongestionPredictor:
         relevant_trains = []
         if all_train_info:
             for train in all_train_info:
-                if direction in train.get('DestinationName', ''):
+                # 檢查 'DestinationName' 是否存在於 train 字典中
+                if train and 'DestinationName' in train and direction in train.get('DestinationName', ''):
                     relevant_trains.append(train)
 
             def parse_countdown_to_seconds(countdown_str):

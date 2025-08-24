@@ -20,7 +20,7 @@ import re
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, List, Any
 
 import dateparser
 from dotenv import load_dotenv
@@ -32,6 +32,7 @@ from services.lost_item_search_service import lost_item_search_service
 from services.realtime_mrt_service import RealtimeMRTService
 from utils.exceptions import (DataLoadError, RouteNotFoundError,
                               StationNotFoundError)
+from utils.time_parser import parse_countdown_to_seconds
 from utils.station_name_normalizer import normalize_station_name
 
 
@@ -905,158 +906,122 @@ def get_best_car_for_exit(
     }, ensure_ascii=False)
 
 @tool
-def get_realtime_mrt_info(station_name: str, destination: str) -> str:
+def get_realtime_mrt_info(start_station_name: str, end_station_name: str) -> str:
     """
-    【即時捷運到站專家】當使用者詢問「現在XX站往YY方向的車還有多久來」、「下一班車在哪裡」等關於
-    特定車站和方向的即時列車資訊時，請使用此工具。這個工具會提供最即時的列車位置和到站倒數。
-
-    Args:
-        station_name (str): 使用者詢問的**目前**所在車站名稱。
-        destination (str): 列車的行駛方向或終點站名稱。
+    【智慧即時到站專家 v2.4 - 措辭精準版】
+    當使用者詢問從 A 站到 B 站的「下一班車」時使用。
+    此版本會用捷運官方的「終點站」來描述列車方向，提供最專業精準的回應。
     """
-    logger.info(f"--- [工具(即時到站)] 查詢: {station_name} 往 {destination} 方向 ---")
+    logger.info(f"--- [智慧即時到站 v2.4] 查詢: 從「{start_station_name}」到「{end_station_name}」的下一班車 ---")
 
-    tool_output = {} # 初始化工具回傳的結構化數據
+    # --- ✨✨✨【核心修改：建立輕量化的內部路徑查詢】✨✨✨
+    def _get_route_for_direction_only(start_name: str, end_name: str) -> Optional[Dict]:
+        """一個只為獲取方向而設計的輕量化內部路徑查詢器。"""
+        start_ids = station_manager.get_station_ids(start_name)
+        end_ids = station_manager.get_station_ids(end_name)
+        if not start_ids or not end_ids: return None
 
+        # 只需遍歷一次，找到第一條可用的路徑即可
+        for start_tdx_id in start_ids:
+            for end_tdx_id in end_ids:
+                start_sid = id_converter.tdx_to_sid(start_tdx_id)
+                end_sid = id_converter.tdx_to_sid(end_tdx_id)
+                if not start_sid or not end_sid: continue
+                
+                try:
+                    api_raw = metro_soap_api.get_recommended_route(start_sid, end_sid)
+                    # 我們只關心路徑是否存在且長度大於1，完全忽略 time_min
+                    if api_raw and isinstance(api_raw.get("path"), list) and len(api_raw["path"]) > 1:
+                        directions = routing_manager.generate_directions_from_path(api_raw["path"])
+                        return {"directions": directions} # 成功獲取，立即回傳
+                except Exception as e:
+                    logger.error(f"輕量化路徑查詢失敗 (SIDs: {start_sid} -> {end_sid}): {e}")
+                    continue # 即使失敗也繼續嘗試下一個ID組合
+        return None
+    # --- ✨✨✨【修改結束】✨✨✨
+
+    # --- ✨✨✨【核心邏輯修正】✨✨✨
     try:
         current_query_time = datetime.now()
+        
+        # 刪除舊的 plan_route.invoke() 呼叫，改為呼叫我們新建的輕量化查詢器
+        route_data = _get_route_for_direction_only(start_station_name, end_station_name)
+        
+        # 檢查輕量化查詢器的結果
+        if not route_data:
+            raise Exception("內部輕量化路徑查詢失敗，找不到任何有效路徑。")
 
-        realtime_mrt_service = service_registry.realtime_mrt_service
-        station_manager = service_registry.station_manager # 確保取得 station_manager
-
-        if not station_name or not destination:
-            raise ValueError("請提供您所在的車站和列車的目的地。")
-
-        # 解析並標準化使用者輸入的站名
-        resolved_station_name = realtime_mrt_service.search_station(station_name)
-        resolved_destination_name = realtime_mrt_service.search_station(destination)
-
-        if not resolved_station_name:
-            raise StationNotFoundError(f"我無法識別車站「{station_name}」。")
-        if not resolved_destination_name:
-            raise StationNotFoundError(f"我無法識別目的地「{destination}」。")
-
-        # 獲取用於顯示給使用者的官方完整名稱
-        official_station_display_name = station_manager.get_official_unnormalized_name(resolved_station_name)
-        official_destination_display_name = station_manager.get_official_unnormalized_name(resolved_destination_name)
-
-        # 推導出真正的列車終點站 (可能有多個，取第一個作為主要方向顯示)
-        target_terminus_list = realtime_mrt_service.resolve_train_terminus(
-            resolved_station_name, resolved_destination_name
-        )
-
-        if not target_terminus_list:
-            tool_output = {
-                "status": "No train found",
-                "reason": "invalid_direction",
-                "query_station": official_station_display_name,
-                "query_destination": official_destination_display_name,
-                "message_hint": f"從「{official_station_display_name}」站沒有往「{official_destination_display_name}」方向的直達列車。",
-                "possible_directions": [station_manager.get_official_unnormalized_name(key) for key in routing_manager.get_terminal_stations_for(resolved_station_name)]
-                # ▲▲▲ 將 station_manager 改為 routing_manager ▲▲▲
-            }
-            return json.dumps(tool_output, ensure_ascii=False)
-
-
-        candidate_trains = realtime_mrt_service.get_next_train_info(
-            target_station_official_name=resolved_station_name,
-            target_direction_normalized_list=target_terminus_list
-        )
-
-        if not candidate_trains:
-            tool_output = {
-                "status": "No train found",
-                "reason": "no_realtime_data",
-                "query_station": official_station_display_name,
-                "query_destination": official_destination_display_name,
-                "message_hint": f"目前沒有找到往「{official_destination_display_name}」方向的列車資訊。"
-            }
-        else:
-            next_train_info = []
-            for train in candidate_trains[:3]: # 只取最近的3班車
-                countdown_str = train.get('CountDown', 'N/A')
-                current_train_station = train.get('StationName', '未知車站')
-
-                eta_seconds = None
-                arrival_time_str = None
-                
-                if countdown_str == '列車進站':
-                    eta_seconds = 0
-                    arrival_time_str = (current_query_time).strftime('%H:%M') # 列車進站，視為立即到達
-                else:
-                    total_minutes = 0
-                    # 嘗試解析 "X分鐘Y秒"
-                    match_seconds = re.search(r'(\d+)\s*分鐘\s*(\d+)\s*秒', countdown_str)
-                    # 嘗試解析 "X分鐘"
-                    match_minutes = re.search(r'(\d+)\s*分鐘', countdown_str)
-                    # 嘗試解析純數字 (例如： "5")
-                    match_single_number = re.search(r'^(\d+)$', countdown_str.strip())
-
-                    if match_seconds:
-                        minutes = int(match_seconds.group(1))
-                        seconds = int(match_seconds.group(2))
-                        eta_seconds = minutes * 60 + seconds
-                    elif match_minutes:
-                        minutes = int(match_minutes.group(1))
-                        eta_seconds = minutes * 60
-                    elif match_single_number:
-                        minutes = int(match_single_number.group(1))
-                        eta_seconds = minutes * 60
-                    
-                    if eta_seconds is not None:
-                        estimated_arrival_datetime = current_query_time + timedelta(seconds=eta_seconds)
-                        arrival_time_str = estimated_arrival_datetime.strftime('%H:%M')
-                    else:
-                        # 如果無法解析，則使用原始倒數字串
-                        countdown_str = countdown_str # 保持原始字串
-
-                next_train_info.append({
-                    "current_location": current_train_station,
-                    "countdown_raw": countdown_str, # 原始倒數字串
-                    "eta_seconds": eta_seconds, # 精確到秒的倒數
-                    "arrival_time": arrival_time_str # 預計抵達的實際時間點 (HH:MM)
-                })
-
-            tool_output = {
-                "status": "Success",
-                "query_time": current_query_time.strftime('%H點%M分'),
-                "query_station": official_station_display_name,
-                "query_destination": official_destination_display_name,
-                "train_terminus": station_manager.get_official_unnormalized_name(target_terminus_list[0]), # 確保是顯示名稱
-                "next_trains": next_train_info,
-                "suggestion": {
-                    "text": "想知道這班車會不會很擠嗎？您可以問我「[車站名稱] 往 [目的地] 擠不擠」",
-                    "example_query": f"{official_station_display_name} 往 {official_destination_display_name} 擠不擠"
-                }
-            }
-
-        return json.dumps(tool_output, ensure_ascii=False)
-
-    except StationNotFoundError as e:
-        tool_output = {
-            "status": "Error",
-            "error_type": "Station Not Found",
-            "message": f"😕 抱歉，我好像找不到您說的車站或目的地耶。錯誤訊息：{e}"
-        }
-        logger.warning(f"--- [工具(即時到站)] 查無車站或目的地: {e} ---")
-        return json.dumps(tool_output, ensure_ascii=False)
-    except ValueError as e:
-        tool_output = {
-            "status": "Error",
-            "error_type": "Invalid Parameter/Direction",
-            "message": f"🤔 哎呀，您提供的資訊好像有點問題，或是該方向沒有直達列車。錯誤訊息：{e}"
-        }
-        logger.warning(f"--- [工具(即時到站)] 參數錯誤或方向無效: {e} ---")
-        return json.dumps(tool_output, ensure_ascii=False)
     except Exception as e:
-        tool_output = {
-            "status": "Error",
-            "error_type": "Unknown Error",
-            "message": "🤖 糟糕，我的捷運查詢系統好像出了一點小狀況，請稍後再試一次喔！"
-        }
-        logger.error(f"--- [工具(即時到站)] 發生未知錯誤: {e} ---", exc_info=True)
-        return json.dumps(tool_output, ensure_ascii=False)
+        logger.error(f"在查詢即時到站時，內部路線規劃失敗: {e}", exc_info=True)
+        return json.dumps({"error": "無法規劃路線以查詢即時資訊。"}, ensure_ascii=False)
+    # --- ✨✨✨【修改結束】✨✨✨
 
+    main_route = route_data.get("routes", [route_data])[0]
+    first_direction_step = next((step for step in main_route.get('directions', []) if "方向" in step), None)
+    if not first_direction_step: return json.dumps({"error": "無法從路線規劃中確定搭乘方向。"}, ensure_ascii=False)
+    match = re.search(r"往「(.+?)」方向", first_direction_step)
+    if not match: return json.dumps({"error": "無法從搭乘指引中解析出目的地。"}, ensure_ascii=False)
+    direction_hint = match.group(1)
+
+    try:
+        resolved_start_name = station_manager.resolve_station_alias(start_station_name)
+        terminus_list = routing_manager.resolve_direction(resolved_start_name, direction_hint)
+        if not terminus_list: raise ValueError(f"無法將方向提示 '{direction_hint}' 解析為有效的終點站。")
+
+        # --- ✨✨✨【核心修改：提取並使用正確的終點站名稱】✨✨✨
+        # terminus_list[0] 儲存的就是我們解析出的、最精準的終點站名稱，例如 "南港展覽館站"
+        actual_destination_name = terminus_list[0]
+        # --- ✨✨✨【修改結束】✨✨✨
+
+        next_trains_raw = realtime_mrt_service.get_next_train_info(
+            target_station_official_name=resolved_start_name,
+            target_direction_normalized_list=terminus_list
+        )
+
+        if not next_trains_raw:
+            # ✨ 在提示訊息中也使用精準的終點站名稱
+            return json.dumps({"message": f"目前查無從「{start_station_name}」往 **{actual_destination_name}** 方向的即時列車資訊，可能是末班車已駛離。"}, ensure_ascii=False)
+
+        next_trains_processed = []
+        for train in next_trains_raw:
+            countdown_str = train.get('CountDown', '未知')
+            arrival_time_str = None
+            eta_seconds = parse_countdown_to_seconds(countdown_str)
+            if eta_seconds != float('inf'):
+                estimated_arrival_datetime = current_query_time + timedelta(seconds=eta_seconds)
+                arrival_time_str = estimated_arrival_datetime.strftime('%H:%M')
+            train['arrival_time'] = arrival_time_str
+            next_trains_processed.append(train)
+
+        first_train = next_trains_processed[0]
+        countdown_text = first_train.get('CountDown', '未知')
+        arrival_time = first_train.get('arrival_time')
+
+        # ✨ 在回覆模板中使用精準的終點站名稱
+        if "列車進站" in countdown_text:
+            arrival_info = f"（{arrival_time}）" if arrival_time else ""
+            message = f"快上車！從「{start_station_name}」搭乘往 **{actual_destination_name}** 方向的列車**正在進站**！{arrival_info} 🏃‍♀️"
+        else:
+            arrival_info = f"（大約 {arrival_time}）" if arrival_time else ""
+            message = f"好的，從「{start_station_name}」搭乘往 **{actual_destination_name}** 方向的下一班列車，預計在 **{countdown_text}** 後抵達 {arrival_info}。"
+
+        if len(next_trains_processed) > 1:
+            second_train = next_trains_processed[1]
+            second_countdown = second_train.get('CountDown', '未知')
+            second_arrival = second_train.get('arrival_time')
+            second_arrival_info = f"（大約 {second_arrival}）" if second_arrival else ""
+            message += f"\n再下一班車約在 **{second_countdown}** 後抵達 {second_arrival_info}。"
+        
+        return json.dumps({
+            "start_station": start_station_name,
+            "end_station": end_station_name,
+            "next_trains": next_trains_processed,
+            "message": message
+        }, ensure_ascii=False)
+
+    except Exception as e:
+        logger.error(f"在獲取即時列車資訊時發生未知錯誤: {e}", exc_info=True)
+        return json.dumps({"error": "查詢即時列車資訊時發生內部問題。"}, ensure_ascii=False)
 
 
 # 因為您真正的預測服務 CongestionPredictor (在 services/prediction_service.py) 本身就有更簡單、直接的方式來處理站名和方向，它並不需要這麼複雜的前置檢查。

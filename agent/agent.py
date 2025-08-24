@@ -79,9 +79,9 @@ SYSTEM_PROMPT = """
     * **你的行動**: `get_first_last_train_time(station_name='忠孝復興')`
 
 * **意圖: 查詢即時列車到站資訊**
-    * **使用者**: `「我在中山站，往松山方向的下一班車還有多久？」`
-    * **你的行動**: `get_realtime_mrt_info(station_name='中山', destination='松山')`
-
+    * **使用者**: `「動物園到市政府的車子多久會來?」` or `「下一班從台北車站往淡水的車」`
+    * **你的行動**: `get_realtime_mrt_info(start_station_name='動物園', end_station_name='市政府')`
+    
 * **意圖: 預測車廂擁擠度**
     * **使用者**: `「明天早上八點，從景安站往迴龍方向的車會很擠嗎？」`
     * **你的行動**: `predict_train_congestion(station_name='景安', direction='迴龍', datetime_str='明天早上八點')`

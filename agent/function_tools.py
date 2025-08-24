@@ -1023,99 +1023,106 @@ def get_realtime_mrt_info(start_station_name: str, end_station_name: str) -> str
         logger.error(f"在獲取即時列車資訊時發生未知錯誤: {e}", exc_info=True)
         return json.dumps({"error": "查詢即時列車資訊時發生內部問題。"}, ensure_ascii=False)
 
+# agent/function_tools.py
+
+# ... (檔案頂部的 import)
+
 @tool
-def predict_train_congestion(station_name: str, direction: str, datetime_str: Optional[str] = None) -> str:
+def predict_train_congestion(
+    start_station_name: str, 
+    end_station_name: str, 
+    datetime_str: Optional[str] = None
+) -> str:
     """
-    【捷運擁擠度預測專家】當使用者詢問「XX站擠不擠」、「YY站往ZZ方向人多嗎」這類關於車廂擁擠度的問題時，請使用此工具。
-    它可以預測當前或未來特定時間的車廂擁擠程度。此工具常與 get_realtime_mrt_info 工具一起使用，來回答關於「車上人多不多」這類複合問題。
-
-    Args:
-        station_name (str): 預測的車站名稱。
-        direction (str): 預測的行駛方向，可以是路線上的任何一個車站名稱。
-        datetime_str (str, optional): 預測的日期和時間，可以是標準格式 `YYYY-MM-DD HH:MM`，
-        也可以是自然語言表達，例如「明天早上八點」或「下一班車」。若未提供此參數，
-        工具將自動使用當前時間進行預測。
+    【智慧擁擠度預測專家 v3.2 - 輕量化路徑版】
+    當使用者詢問從 A 站到 B 站的「車廂擁擠度」時使用。
+    此版本在內部使用一個輕量化的路徑查詢，只獲取方向，忽略時間驗證，以提高穩定性。
     """
-    logger.info(f"--- [工具(預測)] 原始查詢: {station_name} 往 {direction} 方向, 時間: {datetime_str} ---")
+    logger.info(f"--- [工具(預測) v3.2] 查詢: 從「{start_station_name}」到「{end_station_name}」，時間: {datetime_str} ---")
 
-    # --- 基本參數檢查 ---
-    if not station_name or not direction:
-        return json.dumps({
-            "error": "Missing parameters",
-            "message": "🤔 哎呀，我需要知道您想查詢的「車站」和「方向」才能為您預測喔！"
-        }, ensure_ascii=False)
+    if not start_station_name or not end_station_name:
+        return json.dumps({"message": "🤔 哎呀，我需要知道您的「起點」和「終點」才能為您預測喔！"}, ensure_ascii=False)
 
-    # --- 時間解析 (與您原本的邏輯相同) ---
+    # --- ✨✨✨【核心修改：插入輕量化的 plan_route 邏輯】✨✨✨
+    def _get_route_for_direction_only(start_name: str, end_name: str) -> Optional[Dict]:
+        """一個只為獲取方向而設計的輕量化內部路徑查詢器。"""
+        start_ids = station_manager.get_station_ids(start_name)
+        end_ids = station_manager.get_station_ids(end_name)
+        if not (start_ids and isinstance(start_ids, list) and end_ids and isinstance(end_ids, list)): return None
+
+        # 只需遍歷一次，找到第一條可用的路徑即可
+        for start_tdx_id in start_ids:
+            for end_tdx_id in end_ids:
+                start_sid = id_converter.tdx_to_sid(start_tdx_id)
+                end_sid = id_converter.tdx_to_sid(end_tdx_id)
+                if not start_sid or not end_sid: continue
+                
+                try:
+                    # 呼叫 API
+                    api_raw = metro_soap_api.get_recommended_route(start_sid, end_sid)
+                    
+                    # 輕量化驗證：只要有路徑就接受，不管時間
+                    if api_raw and isinstance(api_raw.get("path"), list) and len(api_raw["path"]) > 1:
+                        directions = routing_manager.generate_directions_from_path(api_raw["path"])
+                        return {"directions": directions} # 成功獲取，立即回傳
+                except Exception as e:
+                    logger.error(f"輕量化路徑查詢失敗 (SIDs: {start_sid} -> {end_sid}): {e}")
+                    continue # 即使失敗也繼續嘗試下一個ID組合
+        return None
+    # --- ✨✨✨【修改結束】✨✨✨
+        
+    try:
+        # 呼叫我們新建的輕量化查詢器
+        route_data = _get_route_for_direction_only(start_station_name, end_station_name)
+        if not route_data: raise Exception("內部輕量化路徑查詢失敗，找不到任何有效路徑。")
+    except Exception as e:
+        logger.error(f"在預測擁擠度時，內部路線規劃失敗: {e}", exc_info=True)
+        return json.dumps({"error": "無法規劃路線以進行預測。"}, ensure_ascii=False)
+
+    # ... (後續的程式碼，從解析方向到回傳訊息，都保持不變)
+    first_direction_step = next((step for step in route_data.get('directions', []) if "方向" in step), None)
+    if not first_direction_step: return json.dumps({"error": "無法從路線規劃中確定搭乘方向。"}, ensure_ascii=False)
+    match = re.search(r"往「(.+?)」方向", first_direction_step)
+    if not match: return json.dumps({"error": "無法從搭乘指引中解析出目的地。"}, ensure_ascii=False)
+    
+    direction_hint = match.group(1)
+    
     target_datetime = None
     if datetime_str:
-        if datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"]:
-            target_datetime = datetime.now()
-        else:
-            target_datetime = dateparser.parse(
-                datetime_str,
-                settings={'PREFER_DATES_FROM': 'future', 'TIMEZONE': 'Asia/Taipei'}
-            )
-    
-    if not target_datetime:
-        target_datetime = datetime.now()
-        logger.info("--- 未提供時間或無法解析，自動設定為當前時間 ---")
-    
-    now = datetime.now()
-    if target_datetime > now + timedelta(days=365) or target_datetime < now - timedelta(days=1):
-        logger.warning(f"--- ⚠️ 檢測到不合理的日期: {target_datetime.isoformat()} ---")
-        return json.dumps({
-            "error": "Invalid time period",
-            "message": f"📅 抱歉，您提供的日期 `{datetime_str}` 看起來有點太遙遠了。我只能預測一年內的擁擠度喔！"
-        }, ensure_ascii=False)
+        if datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"]: target_datetime = datetime.now()
+        else: target_datetime = dateparser.parse(datetime_str, settings={'PREFER_DATES_FROM': 'future', 'TIMEZONE': 'Asia/Taipei'})
+    if not target_datetime: target_datetime = datetime.now()
 
-    # --- ✨✨✨【核心邏輯修正】✨✨✨
-    
-    # 從服務註冊中心獲取所有需要的服務
-    station_manager = service_registry.get_station_manager()
-    routing_manager = service_registry.get_routing_manager() # <-- 獲取 routing_manager
-    congestion_predictor = service_registry.get_congestion_predictor()
+    try:
+        resolved_start_name = station_manager.resolve_station_alias(start_station_name)
+        terminus_list = routing_manager.resolve_direction(resolved_start_name, direction_hint)
+        if not terminus_list: raise ValueError(f"無法將方向提示 '{direction_hint}' 解析為有效的終點站。")
+        
+        actual_terminal_name = terminus_list[0]
+        
+        prediction_result = congestion_predictor.predict_for_station(
+            station_name=resolved_start_name,
+            direction=actual_terminal_name,
+            target_datetime=target_datetime
+        )
+    except Exception as e:
+        logger.error(f"在執行預測時發生錯誤: {e}", exc_info=True)
+        return json.dumps({"error": "執行擁擠度預測時發生內部問題。"}, ensure_ascii=False)
 
-    official_station_display_name = station_manager.get_official_unnormalized_name(station_name)
-    original_direction_display_name = station_manager.get_official_unnormalized_name(direction)
-
-    # 關鍵步驟：呼叫 routing_manager (而不是 station_manager) 來解析方向
-    final_terminal_keys = routing_manager.resolve_direction(station_name, direction)
-
-    if not final_terminal_keys:
-        # 呼叫 routing_manager (而不是 station_manager) 來獲取建議
-        possible_terminals_display = [
-            station_manager.get_official_unnormalized_name(key) 
-            for key in routing_manager.get_terminal_stations_for(station_name)
-        ]
-        error_message = f"🧭 哎呀！從「{official_station_display_name}」站，我找不到可以直達「{original_direction_display_name}」的路線耶。"
-        if possible_terminals_display:
-            error_message += f"\n\n您可以試試看查詢往以下終點站的方向：\n✨ **{'、'.join(possible_terminals_display)}**"
-        return json.dumps({"error": "No direct route found", "message": error_message}, ensure_ascii=False)
-
-    target_terminal_key = final_terminal_keys[0]
-    official_terminal_for_prediction = station_manager.get_official_unnormalized_name(target_terminal_key)
-    
-    logger.info(f"--- 方向解析成功: '{direction}' -> '{official_terminal_for_prediction}' ---")
-
-    prediction_result = congestion_predictor.predict_for_station(
-        station_name=official_station_display_name,
-        direction=official_terminal_for_prediction,
-        target_datetime=target_datetime
-    )
-    # --- ✨✨✨【修正結束】✨✨✨
-
-    # --- 格式化輸出 (與您原本的邏輯大致相同，但優化了顯示訊息) ---
+    # ... (組合最終回覆的程式碼不變)
+    # 步驟 5: 組合最終回覆
     if "error" in prediction_result:
         return json.dumps({"message": f"😥 抱歉，預測時發生了一點小問題：{prediction_result['error']}"}, ensure_ascii=False)
 
     congestion_data = prediction_result.get("congestion_by_car", [])
     
+    # --- ✨✨✨【核心修正】✨✨✨
     if congestion_data:
-        time_display = target_datetime.strftime('%Y年%m月%d日 %H點%M分')
+        time_display = "現在" if not datetime_str or datetime_str.lower() in ["現在", "即將", "馬上", "下一班車"] else target_datetime.strftime('%Y年%m月%d日 %H點%M分')
         
-        # 【UX 優化】在回覆中，顯示使用者原始查詢的方向，而不是解析後的終點站
         message_parts = [
-            f"根據預測，在 {time_display} 往「{original_direction_display_name}」方向的列車擁擠度如下：",
+            f"好的，為您預測 {time_display} 從「{start_station_name}」出發往「{end_station_name}」方向的旅程：",
+            f"您將搭乘往 **{actual_terminal_name}** 方向的列車，預計車廂擁擠度如下：",
             "---"
         ]
         
@@ -1125,17 +1132,17 @@ def predict_train_congestion(station_name: str, direction: str, datetime_str: Op
             emoji_text = CONGESTION_EMOJI_MAP.get(congestion_level, "❔")
             message_parts.append(f"第 {car_number} 節車廂：{emoji_text}")
         
-        max_congestion = max(c['congestion_level'] for c in congestion_data) if congestion_data else 0
+        max_congestion = max(c['congestion_level'] for c in congestion_data)
         if max_congestion >= 3:
-            message_parts.append("\n💡 **貼心提醒**：部分車廂可能人潮較多，建議您往較空曠的車廂移動喔！")
-        elif max_congestion == 2:
-            message_parts.append("\n😊 車廂狀況還不錯，人潮普通，可以輕鬆搭乘！")
+            message_parts.append("\n💡 **貼心提醒**：部分車廂可能人潮較多！")
         else:
-            message_parts.append("\n🎉 太棒了！看起來車廂非常空曠，祝您有趟愉快的旅程！")
+            message_parts.append("\n😊 車廂狀況還不錯，祝您旅途愉快！")
             
+        # 將 final_message 的賦值移到 if 區塊的內部
         final_message = "\n".join(message_parts)
     else:
-        final_message = f"😥 抱歉，目前暫時無法取得「{official_station_display_name}」往「{original_direction_display_name}」方向在此時段的擁擠度預測資料。"
+        final_message = f"😥 抱歉，目前暫時無法取得「{start_station_name}」往「{end_station_name}」方向在此時段的擁擠度預測資料。"
+    # --- ✨✨✨【修正結束】✨✨✨
 
     return json.dumps({"message": final_message}, ensure_ascii=False)
 

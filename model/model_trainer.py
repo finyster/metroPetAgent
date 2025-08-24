@@ -51,76 +51,73 @@ def preprocess_for_training(filepath: str, line_type: str) -> Tuple[pd.DataFrame
     df_melted = df.melt(id_vars=id_vars, value_vars=value_vars, var_name='car_position', value_name='congestion')
     df_melted['car_number'] = df_melted['car_position'].str.extract(r'(\d+)').astype(int)
     
-    # 清理目標變數：確保擁擠度是 1, 2, 3, 4 其中之一
     df_melted['congestion'] = pd.to_numeric(df_melted['congestion'], errors='coerce')
     df_melted.dropna(subset=['congestion'], inplace=True)
     df_melted = df_melted[df_melted['congestion'].isin([1, 2, 3, 4])].astype({'congestion': int})
 
     # --- 【 ✨ 特徵工程 2.0 - 導入專家知識 ✨ 】 ---
     logger.info("        -> 正在創建 2.0 版特徵...")
-    df_melted['timestamp'] = pd.to_datetime(df_melted['timestamp'], errors='coerce') # Handle parsing errors
-    
-    # --- 【關鍵修正】在處理節慶特徵前，移除無效的時間戳 (NaT) ---
+    df_melted['timestamp'] = pd.to_datetime(df_melted['timestamp'], errors='coerce')
     original_rows = len(df_melted)
     df_melted.dropna(subset=['timestamp'], inplace=True)
     if len(df_melted) < original_rows:
         logger.warning(f"移除了 {original_rows - len(df_melted)} 筆因無效時間戳導致的資料。")
-    # --- 修正結束 ---
     
     # (A) 更豐富的時間特徵
     df_melted['hour'] = df_melted['timestamp'].dt.hour
-    # 【新增】更細粒度的時間特徵
     df_melted['minute'] = df_melted['timestamp'].dt.minute
     df_melted['day_of_week'] = df_melted['timestamp'].dt.dayofweek
-    df_melted['month'] = df_melted['timestamp'].dt.month  # 新增：月份特徵
-    df_melted['year'] = df_melted['timestamp'].dt.year  # 新增：年份特徵
+    df_melted['month'] = df_melted['timestamp'].dt.month
+    df_melted['year'] = df_melted['timestamp'].dt.year
     df_melted['is_weekend'] = (df_melted['day_of_week'] >= 5).astype(int)
-    df_melted['is_morning_peak'] = ((df_melted['hour'] >= 7) & (df_melted['hour'] <= 9)).astype(int)  # 新增：早高峰
-    df_melted['is_evening_peak'] = ((df_melted['hour'] >= 17) & (df_melted['hour'] <= 19)).astype(int)  # 新增：晚高峰
+    df_melted['is_morning_peak'] = ((df_melted['hour'] >= 7) & (df_melted['hour'] <= 9)).astype(int)
+    df_melted['is_evening_peak'] = ((df_melted['hour'] >= 17) & (df_melted['hour'] <= 19)).astype(int)
     df_melted['is_peak_hour'] = ((df_melted['is_morning_peak'] == 1) | (df_melted['is_evening_peak'] == 1)).astype(int)
 
-    # 新增：節慶特徵
     logger.info("加入節慶特徵...")
     tw_holidays = holidays.TW()
-    # 這裡確保只有有效的日期才會傳遞給 holidays 庫
     df_melted['is_holiday'] = df_melted['timestamp'].dt.date.apply(lambda x: x in tw_holidays).astype(int)
 
-    # (B) 結合捷運路網的空間特徵 (Domain Knowledge)
+    # (B) 結合捷運路網的空間特徵
     with open(os.path.join(DATA_DIR, 'mrt_station_info.json'), 'r', encoding='utf-8') as f:
         station_info = json.load(f)
     
     transfer_stations = {sid for info in station_info.values() if isinstance(info, dict) for sid in info.get('station_ids', []) if info.get('is_transfer')}
     df_melted['is_transfer_station'] = df_melted['station_id'].isin(transfer_stations).astype(int)
     
-    # (C) 滯後特徵 (維持不變，但未來可強化)
+    # (C) 滯後特徵
     df_melted = df_melted.sort_values(by=['station_id', 'line_direction_cid', 'car_number', 'timestamp'])
     
     df_melted['lag_5min_congestion'] = df_melted.groupby(['station_id', 'line_direction_cid', 'car_number'])['congestion'].shift(1)
     df_melted['lag_1hr_congestion'] = df_melted.groupby(['station_id', 'line_direction_cid', 'car_number'])['congestion'].shift(12)
     
-    # 使用平均值填充 NaN 以避免引入噪音
-    # 【修正】使用 .loc 來避免 SettingWithCopyWarning
     df_melted.loc[:, 'lag_5min_congestion'] = df_melted['lag_5min_congestion'].fillna(df_melted['lag_5min_congestion'].mean())
     df_melted.loc[:, 'lag_1hr_congestion'] = df_melted['lag_1hr_congestion'].fillna(df_melted['lag_1hr_congestion'].mean())
     
-    # 3. 類別特徵編碼 - 維持不變
+    # --- 關鍵修正：確保類別特徵處理的穩定性 ---
     categorical_features = ['station_id', 'line_direction_cid']
+    
+    # 這裡的 astype(str) 確保 OneHotEncoder 總是以字串形式處理這些欄位，與預測時一致。
     df_melted[categorical_features] = df_melted[categorical_features].astype(str)
     
     encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
     encoded_data = encoder.fit_transform(df_melted[categorical_features])
     encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(categorical_features), index=df_melted.index)
     
-    # 4. 組合最終特徵
+    # --- 關鍵修正：明確定義所有數值特徵 ---
+    # `line_direction_cid` 被移除了，因為它現在是類別特徵
     numeric_features = [
-        'hour', 'minute', 'day_of_week', 'month', 'year', 'is_weekend', 'is_morning_peak', 'is_evening_peak',
-        'is_peak_hour', 'is_holiday', 'is_transfer_station', 'car_number', 'lag_5min_congestion', 'lag_1hr_congestion'
+        'hour', 'minute', 'day_of_week', 'month', 'year', 'is_weekend', 'is_morning_peak', 
+        'is_evening_peak', 'is_peak_hour', 'is_holiday', 'is_transfer_station', 
+        'car_number', 'lag_5min_congestion', 'lag_1hr_congestion'
     ]
     
+    # 組合最終特徵
     final_df = pd.concat([df_melted[numeric_features].reset_index(drop=True), encoded_df.reset_index(drop=True), df_melted['congestion'].reset_index(drop=True)], axis=1)
+    
+    # --- 關鍵修正：儲存完整的特徵名稱列表，包含獨熱編碼的欄位 ---
     feature_columns = numeric_features + list(encoder.get_feature_names_out(categorical_features))
     
-    # 【新增】特徵縮放
     scaler = StandardScaler()
     final_df[numeric_features] = scaler.fit_transform(final_df[numeric_features])
     

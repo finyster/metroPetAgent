@@ -82,7 +82,7 @@ class CongestionPredictor:
             return 'wenhu', station_id
         return 'high_capacity', station_id
 
-    def _create_prediction_features(self, station_id: str, line_direction_cid: int, line_type: str, target_datetime: datetime) -> pd.DataFrame:
+    def _create_prediction_features(self, station_id: str, line_direction_cid: str, line_type: str, target_datetime: datetime) -> pd.DataFrame:
         """
         根據指定的日期時間，創建模型所需的特徵。
         --- 【核心修正】此函式現在會生成與新版 model_trainer.py 完全一致的特徵集。 ---
@@ -91,21 +91,14 @@ class CongestionPredictor:
             station_info = json.load(f)
         transfer_stations = {sid for info in station_info.values() if isinstance(info, dict) for sid in info.get('station_ids', []) if info.get('is_transfer')}
         
-        # --- 【關鍵修正】根據時間段模擬更合理的滯後擁擠度值 ---
-        # 這裡根據時間段和是否為尖峰時段，給出一個更合理的預設值
         lag_5min_congestion = 0.0
         lag_1hr_congestion = 0.0
-        
-        # 模擬尖峰時段的擁擠度
         if target_datetime.weekday() < 5 and target_datetime.hour in [7, 8, 17, 18]:
             lag_5min_congestion = 1.5 
             lag_1hr_congestion = 2.0  
-        # 模擬週末的擁擠度
         elif target_datetime.weekday() >= 5:
             lag_5min_congestion = 1.0 
             lag_1hr_congestion = 1.0
-        
-        # 模擬夜間或離峰時段的擁擠度
         if target_datetime.hour in [21, 22, 23, 0, 1, 2, 3, 4, 5]:
             lag_5min_congestion = 0.5
             lag_1hr_congestion = 0.5
@@ -115,17 +108,17 @@ class CongestionPredictor:
         for car_num in range(1, num_cars + 1):
             records.append({
                 'station_id': station_id,
-                'line_direction_cid': str(line_direction_cid),
+                'line_direction_cid': line_direction_cid, # 這裡保持字串
                 'hour': target_datetime.hour,
                 'minute': target_datetime.minute,
                 'day_of_week': target_datetime.weekday(),
-                'month': target_datetime.month, # 【新增】
-                'year': target_datetime.year,   # 【新增】
+                'month': target_datetime.month,
+                'year': target_datetime.year,
                 'is_weekend': int(target_datetime.weekday() >= 5),
-                'is_morning_peak': int(7 <= target_datetime.hour <= 9), # 【新增】
-                'is_evening_peak': int(17 <= target_datetime.hour <= 19), # 【新增】
+                'is_morning_peak': int(7 <= target_datetime.hour <= 9),
+                'is_evening_peak': int(17 <= target_datetime.hour <= 19),
                 'is_peak_hour': int(target_datetime.hour in [7, 8, 17, 18, 19]),
-                'is_holiday': int(target_datetime.date() in self.tw_holidays), # 【新增】
+                'is_holiday': int(target_datetime.date() in self.tw_holidays),
                 'is_transfer_station': int(station_id in transfer_stations),
                 'car_number': car_num,
                 'lag_5min_congestion': lag_5min_congestion,
@@ -135,23 +128,25 @@ class CongestionPredictor:
         df_raw = pd.DataFrame(records)
         
         encoder = self.encoders[line_type]
+        # 關鍵修正：確保這裡的類別特徵列表與訓練時一致
         categorical_features = ['station_id', 'line_direction_cid']
         encoded_data = encoder.transform(df_raw[categorical_features])
         encoded_df = pd.DataFrame(encoded_data, columns=encoder.get_feature_names_out(categorical_features))
         
-        # --- 【修正】確保所有新特徵都被包含在數值特徵列表中 ---
+        # 關鍵修正：確保這裡的數值特徵列表與訓練時一致
         numeric_features = [
             'hour', 'minute', 'day_of_week', 'month', 'year', 'is_weekend', 
             'is_morning_peak', 'is_evening_peak', 'is_peak_hour', 'is_holiday', 
             'is_transfer_station', 'car_number', 'lag_5min_congestion', 'lag_1hr_congestion'
         ]
-        
+
         final_df = pd.concat([df_raw[numeric_features].reset_index(drop=True), encoded_df.reset_index(drop=True)], axis=1)
         
         scaler = self.scalers[line_type]
         final_df[numeric_features] = scaler.transform(final_df[numeric_features])
         
         # 使用訓練時儲存的欄位順序，確保完全一致
+        # 這行是最終的保險，確保了即使前面有小錯誤，也能強制對齊
         final_df = final_df.reindex(columns=self.feature_columns[line_type], fill_value=0)
         
         return final_df
@@ -159,7 +154,6 @@ class CongestionPredictor:
     def predict_for_station(self, station_name: str, direction: str, target_datetime: datetime) -> Dict[str, Any]:
         """
         為指定車站和方向提供通用的車廂擁擠度預測。
-        現在可以根據指定的 `target_datetime` 進行預測。
         """
         if not self.is_ready:
             return {"error": "預測服務尚未準備就緒，請檢查模型檔案是否存在。"}
@@ -168,34 +162,39 @@ class CongestionPredictor:
         if not line_type:
             return {"error": f"無法識別車站 '{station_name}'，請確認站名是否正確。"}
             
-        # 注意：這裡的 direction_map 應該與您在 station_service 中定義的方向一致
-        # 為了更精準，可能需要從 station_manager 獲取該站點的有效方向 ID
-        direction_map = {"上行": 1, "往南港展覽館": 1, "往動物園": 1, "往迴龍": 1, "往蘆洲": 1, "往淡水":1, "往北投":1, "下行": 2, "往頂埔": 2, "往象山": 2, "往大安":2, "往南勢角":2, "往新店": 2, "往台電大樓":2, "往板橋":2}
-        line_direction_cid = direction_map.get(direction, 1)
+        direction_map = {
+            "南港展覽館": 1, "動物園": 1, "迴龍": 1, "蘆洲": 1, "淡水": 1, "北投": 1,
+            "頂埔": 2, "象山": 2, "大安": 2, "南勢角": 2, "新店": 2, "台電大樓": 2, "板橋": 2
+        }
+        normalized_direction = direction.replace("往", "").replace("站", "")
+        line_direction_cid = direction_map.get(normalized_direction)
+
+        if line_direction_cid is None:
+            logger.error(f"--- ❌ 無法在 direction_map 中找到方向 '{normalized_direction}' 的對應 CID ---")
+            return {"error": f"無法識別方向 '{direction}'，請確認方向是否正確。"}
 
         logger.info(f"開始為車站 '{station_name}' (ID: {station_id}, 方向: {line_direction_cid}) 於 {target_datetime.strftime('%Y-%m-%d %H:%M')} 進行預測...")
         
         try:
-            X_pred = self._create_prediction_features(station_id, line_direction_cid, line_type, target_datetime)
+            # --- ✨✨✨【核心修正：將 CID 轉換為字串】✨✨✨
+            # 在呼叫 _create_prediction_features 之前，確保 CID 是字串格式
+            line_direction_cid_str = str(line_direction_cid)
+            X_pred = self._create_prediction_features(station_id, line_direction_cid_str, line_type, target_datetime)
+            # --- ✨✨✨【修正結束】✨✨✨
+            
             model = self.models[line_type]
             predictions = model.predict(X_pred)
             
-            # 【關鍵修正】這裡對預測結果進行調整，讓它更貼近現實，不只是舒適
-            # 這是為了應對模型在簡單特徵下可能缺乏變化的問題
-            congestion_map = {0: "舒適", 1: "正常", 2: "略多", 3: "擁擠"} # XGBoost 類別從 0 開始
+            congestion_map = {0: "舒適", 1: "正常", 2: "略多", 3: "擁擠"}
             results = []
             for i, pred_class in enumerate(predictions):
-                # 這裡可以根據預測時間做一些簡單的後處理，增加變動性
-                # 例如，如果預測時間在尖峰時段，即使模型預測舒適，也將其調整為正常
                 level = int(pred_class)
-                
-                # 簡單的後處理邏輯，確保尖峰時段至少為正常
                 if target_datetime.weekday() < 5 and target_datetime.hour in [7, 8, 17, 18]:
-                    if level == 0: level = 1 # 尖峰時段至少是正常
+                    if level == 0: level = 1
                 
                 results.append({
                     "car_number": i + 1,
-                    "congestion_level": level + 1, # 轉換回 1,2,3,4 的等級
+                    "congestion_level": level + 1,
                     "congestion_text": congestion_map.get(level, "未知")
                 })
 
@@ -205,7 +204,6 @@ class CongestionPredictor:
                 "prediction_time": target_datetime.isoformat(),
                 "congestion_by_car": results
             }
-
         except Exception as e:
             logger.error(f"為 '{station_name}' 進行預測時發生錯誤: {e}", exc_info=True)
             return {"error": f"預測時發生內部錯誤，請檢查日誌。"}

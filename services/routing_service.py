@@ -333,3 +333,4 @@ class RoutingManager:
                         terminal_stations.add(terminus_name)
 
         return sorted(list(terminal_stations))
+        

@@ -356,11 +356,6 @@ class MetroSoapService:
         path_list = [s for s in data.get("Path", "").split("-") if s and "線" not in s]
         time_value = int(data.get("Time", 0))
 
-        # --- 【✨核心修正✨】重新加入資料合理性檢查 ---
-        if len(path_list) > 3 and time_value <= 2:
-            logger.warning(f"⚠️ 偵測到官方 API 回傳不合理的時間 ({time_value} 分鐘)，將忽略此結果。")
-            return None
-
         return {
             "path":      path_list,
             "time_min":  time_value,

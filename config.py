@@ -7,6 +7,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # ✨ 新增這一行
 TDX_CLIENT_ID = os.getenv("TDX_CLIENT_ID")
 TDX_CLIENT_SECRET = os.getenv("TDX_CLIENT_SECRET")
 

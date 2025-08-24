@@ -63,7 +63,10 @@ id_converter = service_registry.id_converter_service
 congestion_predictor = service_registry.get_congestion_predictor()
 first_last_train_time_service = service_registry.get_first_last_train_time_service()
 realtime_mrt_service = service_registry.get_realtime_mrt_service()
-time_service = service_registry.get_time_service() # ✨ 1. 獲取 TimeService 實例
+# time_service = service_registry.get_time_service() # <- 舊的可以刪除或註解掉
+llm_time_parser = service_registry.get_llm_time_parser_service() # ✨ 1. 獲取 LLMTimeParserService 實例
+
+# ... (其他工具)
 
 
 # Emoji 對應表，用於美化擁擠度輸出
@@ -1050,9 +1053,8 @@ def predict_train_congestion(
     if not start_station_name or not end_station_name:
         return json.dumps({"message": "🤔 哎呀，我需要知道您的「起點」和「終點」才能為您預測喔！"}, ensure_ascii=False)
     
-    # --- ✨ 2. 簡化時間解析邏輯 ---
-    # 直接呼叫 TimeService，一行搞定！
-    target_datetime = time_service.parse_datetime(datetime_str)
+    # --- ✨ 2. 使用 LLM 驅動的時間解析服務 ---
+    target_datetime = llm_time_parser.parse_datetime(datetime_str)
     # --- ✨ 簡化結束 ---
 
     # --- ✨✨✨【核心修改：插入輕量化的 plan_route 邏輯】✨✨✨

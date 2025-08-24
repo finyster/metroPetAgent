@@ -35,8 +35,8 @@ from .station_id_resolver import StationIdResolver
 from .prediction_service import CongestionPredictor
 from .first_last_train_time_service import FirstLastTrainTimeService
 from .realtime_mrt_service import RealtimeMRTService
-from .time_service import TimeService, time_service # 同時導入 TimeService 類別和 time_service 實例
-
+#from .time_service import TimeService, time_service # 同時導入 TimeService 類別和 time_service 實例
+from .llm_time_parser_service import LLMTimeParserService, llm_time_parser_service# ✨ 1. 導入我們新的 LLMTimeParserService 實例
 
 # ---------------------------------------------------------------------
 # 2. 基本設定 (Basic Configuration)
@@ -75,7 +75,9 @@ class ServiceRegistry:
             self.station_manager = station_manager
             self.tdx_api = tdx_api
             self.metro_soap_api = metro_soap_api
-            self.time_service = time_service # ✨ 2. 將 time_service 加入到註冊中心
+            # self.time_service = time_service # <- 舊的可以刪除或註解掉
+            self.llm_time_parser_service = llm_time_parser_service # ✨ 2. 將新服務加入到註冊中心
+
 
             
             # --- 步驟 2: 初始化 AI/輔助工具型服務 (依賴基礎服務) ---
@@ -129,7 +131,8 @@ class ServiceRegistry:
     def get_vector_search_service(self): return self.vector_search_service
     def get_id_converter_service(self): return self.id_converter_service
     def get_station_id_resolver(self) -> StationIdResolver: return self.station_id_resolver
-    def get_time_service(self) -> TimeService: return self.time_service
+    # def get_time_service(self) -> "TimeService": return self.time_service # <- 舊的可以刪除或註解掉
+    def get_llm_time_parser_service(self) -> LLMTimeParserService: return self.llm_time_parser_service # ✨ 3. 新增一個 getter 方法
 
 # ---------------------------------------------------------------------
 # 4. 全域單例 (Global Singleton)

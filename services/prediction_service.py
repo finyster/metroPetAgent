@@ -85,12 +85,13 @@ class CongestionPredictor:
     def _create_prediction_features(self, station_id: str, line_direction_cid: str, line_type: str, target_datetime: datetime) -> pd.DataFrame:
         """
         根據指定的日期時間，創建模型所需的特徵。
-        --- 【核心修正】此函式現在會生成與新版 model_trainer.py 完全一致的特徵集。 ---
+        --- 【最終優化版】此函式現在的邏輯與 model_trainer.py 中的特徵工程完全一致。 ---
         """
         with open(os.path.join(DATA_DIR, 'mrt_station_info.json'), 'r', encoding='utf-8') as f:
             station_info = json.load(f)
         transfer_stations = {sid for info in station_info.values() if isinstance(info, dict) for sid in info.get('station_ids', []) if info.get('is_transfer')}
         
+        # 模擬滯後特徵 (與訓練腳本一致的簡易邏輯)
         lag_5min_congestion = 0.0
         lag_1hr_congestion = 0.0
         if target_datetime.weekday() < 5 and target_datetime.hour in [7, 8, 17, 18]:
@@ -145,8 +146,7 @@ class CongestionPredictor:
         scaler = self.scalers[line_type]
         final_df[numeric_features] = scaler.transform(final_df[numeric_features])
         
-        # 使用訓練時儲存的欄位順序，確保完全一致
-        # 這行是最終的保險，確保了即使前面有小錯誤，也能強制對齊
+        # 【最終保險】使用訓練時儲存的欄位順序，確保特徵的名稱、數量、順序完全一致
         final_df = final_df.reindex(columns=self.feature_columns[line_type], fill_value=0)
         
         return final_df
@@ -166,6 +166,7 @@ class CongestionPredictor:
             "南港展覽館": 1, "動物園": 1, "迴龍": 1, "蘆洲": 1, "淡水": 1, "北投": 1,
             "頂埔": 2, "象山": 2, "大安": 2, "南勢角": 2, "新店": 2, "台電大樓": 2, "板橋": 2
         }
+        # 【優化】清理方向字串，使其能匹配 direction_map 的鍵
         normalized_direction = direction.replace("往", "").replace("站", "")
         line_direction_cid = direction_map.get(normalized_direction)
 
@@ -176,11 +177,9 @@ class CongestionPredictor:
         logger.info(f"開始為車站 '{station_name}' (ID: {station_id}, 方向: {line_direction_cid}) 於 {target_datetime.strftime('%Y-%m-%d %H:%M')} 進行預測...")
         
         try:
-            # --- ✨✨✨【核心修正：將 CID 轉換為字串】✨✨✨
-            # 在呼叫 _create_prediction_features 之前，確保 CID 是字串格式
+            # 【優化】在呼叫前將 CID 轉為字串，以匹配 one-hot encoder 的期望輸入
             line_direction_cid_str = str(line_direction_cid)
             X_pred = self._create_prediction_features(station_id, line_direction_cid_str, line_type, target_datetime)
-            # --- ✨✨✨【修正結束】✨✨✨
             
             model = self.models[line_type]
             predictions = model.predict(X_pred)
@@ -189,6 +188,7 @@ class CongestionPredictor:
             results = []
             for i, pred_class in enumerate(predictions):
                 level = int(pred_class)
+                # 後處理：確保尖峰時段的預測更貼近現實
                 if target_datetime.weekday() < 5 and target_datetime.hour in [7, 8, 17, 18]:
                     if level == 0: level = 1
                 
@@ -217,8 +217,6 @@ class CongestionPredictor:
 
         logger.info(f"--- 🚀 正在從 Metro API 獲取即時列車資訊以查找車站 '{station_name}' 往 '{direction}' 方向 ---")
         try:
-            # 確保 metro_soap_api.get_realtime_track_info() 能夠正確調用
-            # 如果這個函數需要參數，請根據實際情況傳遞
             all_train_info = metro_soap_api.get_realtime_track_info() 
         except Exception as e:
             logger.error(f"獲取即時列車資訊時發生錯誤: {e}", exc_info=True)
@@ -232,7 +230,6 @@ class CongestionPredictor:
         relevant_trains = []
         if all_train_info:
             for train in all_train_info:
-                # 檢查 'DestinationName' 是否存在於 train 字典中
                 if train and 'DestinationName' in train and direction in train.get('DestinationName', ''):
                     relevant_trains.append(train)
 

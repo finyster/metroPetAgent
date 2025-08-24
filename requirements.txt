@@ -16,7 +16,8 @@ scikit-learn>=1.0.0
 xgboost>=2.0.0
 beautifulsoup4>=4.13.0
 lxml>=5.0.0
-dateparser
+dateparser>=1.2.2
+holidays>=0.79
 
 # --- FastAPI Server ---
 fastapi>=0.110.0
@@ -36,4 +37,3 @@ langchain-community
 # 確保 XML 解析和資料處理無誤
 
 torch>=2.1
-holidays

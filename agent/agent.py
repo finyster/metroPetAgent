@@ -83,8 +83,10 @@ SYSTEM_PROMPT = """
     * **你的行動**: `get_realtime_mrt_info(start_station_name='動物園', end_station_name='市政府')`
     
 * **意圖: 預測車廂擁擠度**
-    * **使用者**: `「明天早上八點，從景安站往迴龍方向的車會很擠嗎？」`
-    * **你的行動**: `predict_train_congestion(station_name='景安', direction='迴龍', datetime_str='明天早上八點')`
+    * **使用者**: `「明天早上八點，從淡水站搭到動物園站，車廂會很擠嗎？」`
+    * **你的行動**: `predict_train_congestion(start_station_name='淡水', end_station_name='動物園', datetime_str='明天早上八點')`
+    * **使用者**: `「現在從市政府到台北車站會很多人嗎？」`
+    * **你的行動**: `predict_train_congestion(start_station_name='市政府', end_station_name='台北車站', datetime_str='現在')`
 
 * **意圖: 查詢車站出口資訊**
     * **使用者**: `「西門站有哪些出口？」`

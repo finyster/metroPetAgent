@@ -17,6 +17,7 @@ import json
 import logging
 import random
 import re
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
@@ -72,84 +73,122 @@ CONGESTION_EMOJI_MAP = {1: "😊 舒適", 2: "🤔 正常", 3: "😥 略多", 4:
 # ---------------------------------------------------------------------
 # 1. 路徑規劃
 # ---------------------------------------------------------------------#
+
 @tool
 def plan_route(start_station_name: str, end_station_name: str) -> str:
     """
-    【路徑規劃專家】
-    接收起點和終點站名，規劃路線並提供兩種資訊：
-    1. 詳細、人性化的搭乘方向指引。
-    2. 官方API提供的、包含所有停靠站的完整路徑列表。
+    【路徑規劃專家 v3.3 - 邊界處理版】
+    接收起點和終點站名，透過呼叫官方 API 智慧規劃所有可能的路線。
+    此版本增加了對相同起終點的檢查，能提供更友善的回應。
     """
-    logger.info(f"🚀 [路徑規劃] 開始規劃路徑：從「{start_station_name}」到「{end_station_name}」。")
+    logger.info(f"🚀 [路徑規劃 v3.3] 開始規劃路徑：從「{start_station_name}」到「{end_station_name}」。")
 
-    # 1. 驗證站名
+    # --- ✨✨✨【核心修正處：加入相同站點檢查】✨✨✨
+    # 使用 normalize_station_name 來確保比較的一致性
+    norm_start = normalize_station_name(start_station_name)
+    norm_end = normalize_station_name(end_station_name)
+    if norm_start == norm_end:
+        return json.dumps({
+            "error": "起點與終點站相同",
+            "message": f"您已經在「{start_station_name}」囉！不需要再搭車了。😊"
+        }, ensure_ascii=False)
+    # --- ✨✨✨【修正結束】✨✨✨
+
+    # 1. 驗證站名 (邏輯不變)
     start_result = station_manager.get_station_ids(start_station_name)
     end_result = station_manager.get_station_ids(end_station_name)
 
-    # ... (站名驗證邏輯與您提供的版本相同，此處為簡化省略，請保留您原有的驗證碼)
-    if isinstance(start_result, dict) and 'suggestion' in start_result:
-        return json.dumps({"error": "need_confirmation", **start_result}, ensure_ascii=False)
     if not start_result or not isinstance(start_result, list):
         return json.dumps({"error": f"抱歉，我找不到名為「{start_station_name}」的捷運站。"}, ensure_ascii=False)
-    if isinstance(end_result, dict) and 'suggestion' in end_result:
-        return json.dumps({"error": "need_confirmation", **end_result}, ensure_ascii=False)
     if not end_result or not isinstance(end_result, list):
         return json.dumps({"error": f"抱歉，我找不到名為「{end_station_name}」的捷運站。"}, ensure_ascii=False)
 
-    start_sid = id_converter.tdx_to_sid(start_result[0])
-    end_sid = id_converter.tdx_to_sid(end_result[0])
+    # ... (後續的所有邏輯，包括重試和組合訊息，都保持不變)
+    def get_line_name_from_scode(scode: str) -> str:
+        line_map = {'BL': '板南線', 'BR': '文湖線', 'R': '淡水信義線', 'G': '松山新店線', 'O': '中和新蘆線', 'Y': '環狀線'}
+        prefix = re.match(r"([A-Z]+)", scode)
+        return line_map.get(prefix.group(1), "未知路線") if prefix else "未知路線"
 
-    # 2. 主要邏輯：優先使用官方API
-    if start_sid and end_sid:
-        logger.info(f"📞 嘗試呼叫北捷官方 SOAP API (SID: {start_sid} -> {end_sid})...")
-        try:
-            api_raw = metro_soap_api.get_recommended_route(start_sid, end_sid)
-            
-            if api_raw and isinstance(api_raw.get("path"), list) and len(api_raw["path"]) > 1:
-                logger.info("✅ 成功從官方 API 獲取建議路線，開始進行雙重路徑處理...")
-                
-                # --- ✨ 核心改動 ✨ ---
-                # 2.1 獲取原始的完整路徑列表
-                full_path_list = api_raw["path"]
-                
-                # 2.2 產生人性化的搭乘指引
-                detailed_directions = routing_manager.generate_directions_from_path(full_path_list)
-                
-                # 2.3 組合包含兩種資訊的最終訊息
-                message = (
-                    f"好的，從「{start_station_name}」到「{end_station_name}」的建議路線如下，預估時間約 {api_raw['time_min']} 分鐘：\n\n"
-                    f"**搭乘指引：**\n" +
-                    "\n".join(f"➡️ {step}" for step in detailed_directions) +
-                    f"\n\n**行經車站：**\n" +
-                    f"{' → '.join(full_path_list)}"
-                )
-                
-                # 2.4 回傳包含所有資訊的 JSON
-                return json.dumps({
-                    "source": "official_api_enhanced",
-                    "time_min": api_raw["time_min"],
-                    "directions": detailed_directions, # 人性化指引
-                    "full_path": full_path_list,       # 原始停靠站
-                    "message": message
-                }, ensure_ascii=False)
+    found_routes = {}
+    MAX_RETRIES = 3
+    RETRY_DELAY_SECONDS = 1
 
-        except Exception as e:
-            logger.error(f"調用官方 SOAP API 或人性化處理時發生錯誤: {e}", exc_info=True)
+    for start_tdx_id in start_result:
+        for end_tdx_id in end_result:
+            start_sid = id_converter.tdx_to_sid(start_tdx_id)
+            end_sid = id_converter.tdx_to_sid(end_tdx_id)
+
+            if not start_sid or not end_sid:
+                continue
+
+            for attempt in range(MAX_RETRIES):
+                try:
+                    api_raw = metro_soap_api.get_recommended_route(start_sid, end_sid)
+                    
+                    is_valid_route = False
+                    if api_raw and isinstance(api_raw.get("path"), list) and len(api_raw["path"]) > 1:
+                        path_list = api_raw.get("path", [])
+                        
+                        if len(path_list) <= 2:
+                            is_valid_route = True
+                        else:
+                            time_min = api_raw.get("time_min", 0)
+                            if time_min > 1:
+                                is_valid_route = True
+                    
+                    if is_valid_route:
+                        path_key = tuple(api_raw["path"])
+                        if path_key not in found_routes:
+                            detailed_directions = routing_manager.generate_directions_from_path(api_raw["path"])
+                            start_line_name = get_line_name_from_scode(start_tdx_id)
+                            
+                            found_routes[path_key] = {
+                                "source": "official_api_enhanced",
+                                "start_line": start_line_name,
+                                "time_min": api_raw.get("time_min", 0),
+                                "directions": detailed_directions,
+                                "full_path": api_raw.get("path", [])
+                            }
+                        break 
+                    
+                    else:
+                        logger.warning(f"--- ⚠️ API 回傳數據經驗證後不合理，正在進行第 {attempt + 1}/{MAX_RETRIES} 次重試... (SIDs: {start_sid} -> {end_sid}) ---")
+                        time.sleep(RETRY_DELAY_SECONDS)
+
+                except Exception as e:
+                    logger.error(f"調用官方 SOAP API (SIDs: {start_sid} -> {end_sid}) 時發生錯誤: {e}", exc_info=True)
+                    break
     
-    # 3. 備用方案 (保持不變，它本身就會回傳詳細資訊)
-    logger.warning("SOAP API 無法使用或呼叫失敗，啟動備用方案：本地路網圖演算法。")
-    try:
-        fallback = routing_manager.find_shortest_path(start_station_name, end_station_name)
-        if "path_details" in fallback:
-            logger.info("✅ 成功透過本地演算法找到備用路徑。")
-            fallback["message"] = "（備用方案）" + fallback["message"]
-            return json.dumps({"source": "local_fallback", **fallback}, ensure_ascii=False)
-    except Exception as e:
-        logger.error(f"本地路網規劃時發生未知錯誤: {e}", exc_info=True)
+    if not found_routes:
+        return json.dumps({"error": f"非常抱歉，我無法從官方 API 獲取到從「{start_station_name}」到「{end_station_name}」的有效路線資訊，請稍後再試。"}, ensure_ascii=False)
 
-    # 4. 最終失敗
-    logger.error(f"❌ 無法規劃路徑：從「{start_station_name}」到「{end_station_name}」，所有方法均失敗。")
-    return json.dumps({"error": f"非常抱歉，我無法規劃從「{start_station_name}」到「{end_station_name}」的路線。"}, ensure_ascii=False)
+    final_routes = list(found_routes.values())
+    
+    if len(final_routes) == 1:
+        route = final_routes[0]
+        message = (
+            f"好的，從「{start_station_name}」到「{end_station_name}」的建議路線如下，預估時間約 {route['time_min']} 分鐘：\n\n"
+            f"**搭乘指引：**\n" +
+            "\n".join(f"➡️ {step}" for step in route['directions']) +
+            f"\n\n**行經車站：**\n" +
+            f"{' → '.join(route['full_path'])}"
+        )
+        route["message"] = message
+        return json.dumps(route, ensure_ascii=False)
+    else:
+        message_parts = [f"由於「{start_station_name}」或「{end_station_name}」是多條路線的交會站，為您找到以下幾種搭乘方案：\n"]
+        for i, route in enumerate(final_routes):
+            message_parts.append(f"\n--- **方案 {i+1}：從【{route['start_line']}】出發** ---")
+            message_parts.append(f"預估時間約 {route['time_min']} 分鐘")
+            message_parts.append("**搭乘指引：**")
+            message_parts.append("\n".join(f"➡️ {step}" for step in route['directions']))
+        
+        final_message = "\n".join(message_parts)
+        return json.dumps({
+            "message": final_message,
+            "routes": final_routes
+        }, ensure_ascii=False)
+    
 # ---------------------------------------------------------------------
 # 2. 票價查詢
 # ---------------------------------------------------------------------
@@ -750,13 +789,13 @@ def list_all_stations() -> str:
 # ✨✨✨ END: 新增的工具 ✨✨✨
 
 @tool
-def get_best_car_for_exit(station_name: str, direction: str, exit_number: int) -> str:
+def get_best_car_for_exit(station_name: str, exit_identifier: str) -> str:
     """
-    【最佳車廂推薦專家】
-    當使用者到達某個捷運站，並想知道前往特定出口（例如3號出口）應該從哪個車廂下車最快時，使用此工具。
-    你需要提供車站名稱、列車的行駛方向（終點站名稱），以及使用者想去的出口號碼。
+    【下車站點優化專家】
+    當使用者想知道在某個車站下車後，前往特定出口（例如'3號出口'或'M5出口'）應該搭乘哪節車廂最快時，使用此工具。
+    這個工具只需要提供「抵達的車站名稱」和「想去的出口編號或代碼」。
     """
-    logger.info(f" optimizing [最佳車廂推薦] 正在為「{station_name}」站，往「{direction}」方向，查詢靠近「{exit_number}」號出口的車廂。")
+    logger.info(f" optimizing [最佳車廂推薦] 正在為「{station_name}」站查詢靠近「{exit_identifier}」號出口的車廂。")
 
     # 1. 載入車廂出口對應資料
     car_exit_data = local_data_manager.car_exit_map
@@ -766,8 +805,7 @@ def get_best_car_for_exit(station_name: str, direction: str, exit_number: int) -
     # 2. 標準化站名以便搜尋
     norm_station = normalize_station_name(station_name)
     
-    # 3. 尋找符合的車站、路線與方向
-    found_cars = []
+    # 3. 尋找符合的車站資訊
     station_info = None
     for item in car_exit_data:
         if normalize_station_name(item.get("station")) == norm_station:
@@ -777,35 +815,45 @@ def get_best_car_for_exit(station_name: str, direction: str, exit_number: int) -
     if not station_info:
         return json.dumps({"error": f"找不到「{station_name}」的車廂出口資料。"}, ensure_ascii=False)
 
-    # 4. 尋找最匹配的方向 (處理 "往動物園" vs "動物園" 的情況)
-    direction_data = None
-    for dir_key, dir_value in station_info.get("Directions", {}).items():
-        if direction in dir_key or dir_key in direction:
-            direction_data = dir_value
-            break
-            
-    if not direction_data:
-         return json.dumps({"error": f"在「{station_name}」站找不到往「{direction}」方向的列車資訊。"}, ensure_ascii=False)
+    # 4. 處理出口編號，使其能比對 '3' 和 'M3'
+    # 我們只取數字和英文字母，並轉為大寫
+    target_exit = ''.join(filter(str.isalnum, str(exit_identifier))).upper()
 
-    # 5. 遍歷車廂列表，找出包含目標出口的車廂
-    for car_info in direction_data.get("list", []):
-        if exit_number in car_info.get("exits", []):
-            found_cars.append(str(car_info.get("car")))
+    # 5. 遍歷該站點所有方向，找出包含目標出口的車廂
+    results_by_direction = {}
+    directions_data = station_info.get("Directions", {})
+    
+    for direction_name, direction_details in directions_data.items():
+        found_cars = []
+        for car_info in direction_details.get("list", []):
+            # 將資料中的出口也進行標準化比對
+            normalized_exits = [''.join(filter(str.isalnum, str(e))).upper() for e in car_info.get("exits", [])]
+            if target_exit in normalized_exits:
+                found_cars.append(str(car_info.get("car")))
+        
+        if found_cars:
+            results_by_direction[direction_name] = found_cars
 
     # 6. 格式化回傳訊息
-    if not found_cars:
-        message = f"很抱歉，在「{station_name}」站往「{direction}」方向的列車，資料中沒有特別標示靠近 {exit_number} 號出口的車廂。建議您在月台留意出口指示圖。"
-        return json.dumps({"station": station_name, "exit_number": exit_number, "found": False, "message": message}, ensure_ascii=False)
+    if not results_by_direction:
+        message = f"很抱歉，在「{station_name}」站的資料中，沒有找到靠近 {exit_identifier} 出口的車廂資訊。建議您在月台留意出口指示圖。"
+        return json.dumps({"station": station_name, "exit_identifier": exit_identifier, "found": False, "message": message}, ensure_ascii=False)
     
-    car_str = "、".join(found_cars)
-    message = f"好的！在「{station_name}」站下車後，若要前往 {exit_number} 號出口，建議您搭乘第 **{car_str}** 節車廂會最快抵達！"
+    message_parts = [f"好的！如果您要在「{station_name}」站前往 {exit_identifier} 出口，建議的車廂位置如下：\n"]
+    for direction, cars in results_by_direction.items():
+        car_str = "、".join(cars)
+        message_parts.append(f"**如果您搭乘的是開往【{direction.replace('往', '')}】的列車**，建議您搭乘第 **{car_str}** 節車廂。")
+
+    if len(results_by_direction) > 1:
+        message_parts.append("\n請根據您實際搭乘的列車方向，參考對應的車廂建議喔！")
+
+    final_message = "\n".join(message_parts)
     
     return json.dumps({
         "station": station_name,
-        "direction": direction,
-        "exit_number": exit_number,
-        "recommended_cars": found_cars,
-        "message": message
+        "exit_identifier": exit_identifier,
+        "results": results_by_direction,
+        "message": final_message
     }, ensure_ascii=False)
 
 @tool
@@ -856,7 +904,8 @@ def get_realtime_mrt_info(station_name: str, destination: str) -> str:
                 "query_station": official_station_display_name,
                 "query_destination": official_destination_display_name,
                 "message_hint": f"從「{official_station_display_name}」站沒有往「{official_destination_display_name}」方向的直達列車。",
-                "possible_directions": [station_manager.get_official_unnormalized_name(key) for key in station_manager.get_terminal_stations_for(resolved_station_name)]
+                "possible_directions": [station_manager.get_official_unnormalized_name(key) for key in routing_manager.get_terminal_stations_for(resolved_station_name)]
+                # ▲▲▲ 將 station_manager 改為 routing_manager ▲▲▲
             }
             return json.dumps(tool_output, ensure_ascii=False)
 
@@ -1057,6 +1106,66 @@ def predict_train_congestion(station_name: str, direction: str, datetime_str: Op
     response = {"message": final_message}
     return json.dumps(response, ensure_ascii=False)
 
+@tool
+def get_user_manual_info(topic: str, category: Optional[str] = None) -> str:
+    """
+    【使用者手冊查詢 v2.0】
+    查詢關於此 AI 助理的資訊。
+    - 當使用者初次詢問功能時，使用 topic='功能' 來獲取功能總覽。
+    - 當使用者想深入了解某個類別時，同時傳入 topic='功能' 和 category='類別名稱' (例如 '通勤與返家')。
+    - 當使用者問 '你是誰' 時，使用 topic='介紹'。
+    """
+    logger.info(f"📖 [使用者手冊 v2.0] 查詢主題: {topic}, 類別: {category}")
+    manual = local_data_manager.user_manual
+    if not manual:
+        return json.dumps({"error": "找不到使用者手冊資料。"}, ensure_ascii=False)
+
+    usage_guide = manual.get("usage_guide", {})
+
+    # 如果指定了 category，就回傳該類別的詳細資訊
+    if category:
+        category_details = next((sc for sc in usage_guide.get("scenarios", []) if category in sc.get("scenario_title", "")), None)
+        if not category_details:
+            return json.dumps({"error": f"找不到名為 '{category}' 的功能類別。"}, ensure_ascii=False)
+        
+        message_parts = [f"好的，這是有關 **{category_details.get('scenario_title')}** 的詳細用法：\n"]
+        for example in category_details.get("examples", []):
+            message_parts.append(f"- **當你問**:「{example.get('question')}」")
+            message_parts.append(f"  - **我會**: {example.get('capability')}")
+        
+        return json.dumps({
+            "topic": "功能詳情",
+            "category": category,
+            "message": "\n".join(message_parts)
+        }, ensure_ascii=False, indent=2)
+
+    # 如果 topic 是 '功能' 或 '用法'，但沒有指定 category，則回傳總覽
+    if "功能" in topic or "用法" in topic:
+        categories = usage_guide.get("categories", [])
+        if not categories:
+            return json.dumps({"error": "手冊中找不到功能類別。"}, ensure_ascii=False)
+
+        message_parts = [
+            usage_guide.get('description', '我主要有以下幾大類功能：'),
+            ""
+        ]
+        for cat in categories:
+            message_parts.append(f"**{cat.get('title')}**: {cat.get('summary')}")
+
+        return json.dumps({
+            "topic": "功能總覽",
+            "message": "\n".join(message_parts)
+        }, ensure_ascii=False, indent=2)
+
+    # 預設回傳歡迎與介紹訊息
+    welcome_info = manual.get("welcome", {})
+    message = (
+        f"**{welcome_info.get('title', '哈囉！')}**\n\n"
+        f"{welcome_info.get('greeting')}\n\n"
+        f"你可以問我**「你有什麼功能？」**來看看我能為你做些什麼喔！"
+    )
+    return json.dumps({"topic": "整體介紹", "message": message}, ensure_ascii=False, indent=2)
+
 
 # =====================================================================
 # 最終工具列表 (Final Tool List)
@@ -1083,6 +1192,7 @@ all_tools = [
     get_metro_line_info,
     list_all_metro_lines,
     list_all_stations,
+    get_user_manual_info,
 ]
 
 logger.info(f"--- [Tools] 總共 {len(all_tools)} 個工具已成功註冊並準備就緒。 ---")

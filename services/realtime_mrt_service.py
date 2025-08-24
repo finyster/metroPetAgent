@@ -13,9 +13,11 @@ import uuid
 # 假設這些是您的其他依賴
 # 您原本使用的 metro_soap_service.py
 from services.metro_soap_service import MetroSoapService 
+from services.routing_service import RoutingManager
 # 您原本的 station_service.py
 from services.station_service import StationManager 
 from utils.time_parser import parse_countdown_to_seconds
+from utils.station_name_normalizer import normalize_station_name
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +28,10 @@ DEFAULT_DB_PATH = os.path.join(DATA_DIR, "realtime_train_db.json")
 DEFAULT_INDEX_PATH = os.path.join(DATA_DIR, "station_index.faiss")
 
 class RealtimeMRTService:
-    def __init__(self, metro_soap_api: MetroSoapService, station_manager: StationManager, update_interval_seconds: int = 15, db_path: str = DEFAULT_DB_PATH, index_path: str = DEFAULT_INDEX_PATH):
+    def __init__(self, metro_soap_api: MetroSoapService, station_manager: StationManager, routing_manager: RoutingManager, update_interval_seconds: int = 15, db_path: str = DEFAULT_DB_PATH, index_path: str = DEFAULT_INDEX_PATH):
         self.metro_soap_api = metro_soap_api
         self.station_manager = station_manager
+        self.routing_manager = routing_manager
         self.update_interval_seconds = update_interval_seconds
         self.db_path = db_path
         self.index_path = index_path
@@ -199,7 +202,8 @@ class RealtimeMRTService:
             logger.warning("--- ⚠️ 無法獲取列車資訊以篩選下一班列車。 ---")
             return []
         
-        target_station_normalized = self.station_manager._normalize_name_for_map(target_station_official_name)
+        # ▼▼▼ 請修改以下程式碼 ▼▼▼
+        target_station_normalized = normalize_station_name(target_station_official_name)
         candidate_trains = []
 
         for train in all_train_info:
@@ -207,8 +211,9 @@ class RealtimeMRTService:
             train_destination_raw = train.get('DestinationName')
             countdown_str = train.get('CountDown', '')
 
-            train_current_station_normalized = self.station_manager._normalize_name_for_map(train_current_station_raw)
-            train_destination_normalized = self.station_manager._normalize_name_for_map(train_destination_raw)
+            train_current_station_normalized = normalize_station_name(train_current_station_raw)
+            train_destination_normalized = normalize_station_name(train_destination_raw)
+        # ▲▲▲ 修改結束 ▲▲▲
 
             countdown_seconds = parse_countdown_to_seconds(countdown_str)
             if countdown_seconds == float('inf'):
@@ -269,8 +274,11 @@ class RealtimeMRTService:
         """
         # 使用 StationManager 的 resolve_direction 方法，這個方法已經包含了所有邏輯
         # 它會將「往淡水」這類的指令解析為實際的終點站名稱，並處理別名
-        resolved_terminus = self.station_manager.resolve_direction(start_station_name, intermediate_destination)
-        
+        # ▼▼▼ 修改呼叫的對象 ▼▼▼
+        # 將 self.station_manager 改為 self.routing_manager
+        resolved_terminus = self.routing_manager.resolve_direction(start_station_name, intermediate_destination)
+        # ▲▲▲ 修改結束 ▲▲▲
+
         if not resolved_terminus:
             logger.warning(f"--- ⚠️ 無法從 '{start_station_name}' 往 '{intermediate_destination}' 推導出可能的終點站 ---")
         

@@ -101,7 +101,8 @@ class ServiceRegistry:
             )
             self.realtime_mrt_service = RealtimeMRTService(
                 metro_soap_api=self.metro_soap_api,
-                station_manager=self.station_manager
+                station_manager=self.station_manager,
+                routing_manager=self.routing_manager 
             )
             # 啟動即時列車資訊的背景更新線程
             self.realtime_mrt_service.start_update_thread()

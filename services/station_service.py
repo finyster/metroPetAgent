@@ -124,6 +124,16 @@ class StationManager:
         """
         return self.official_name_map.get(normalized_name, normalized_name)
 
+    def resolve_station_alias(self, station_name: str) -> str:
+        """
+        【新加入】將使用者輸入的站名（可能是別名或簡稱）解析為其標準化的官方名稱。
+        這是為了給其他服務提供一個統一的站名解析入口。
+        """
+        norm_name = normalize_station_name(station_name)
+        # self.official_name_map 中儲存了從「別名」到「官方名稱」的映射
+        # 如果在映射中找到了，就回傳官方名稱；如果找不到，就回傳標準化後的名稱
+        return self.official_name_map.get(norm_name, norm_name)
+    
     def get_all_station_names(self) -> List[str]:
         """
         回傳所有不含英文和別名的官方中文站名列表，用於盤點。

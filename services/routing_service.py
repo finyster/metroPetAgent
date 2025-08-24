@@ -53,12 +53,17 @@ class RoutingManager:
                     id_to_name[station_id] = name.replace("臺", "台") + "站"
         return id_to_name
 
-    def _get_line_name_and_color(self, line_code: str) -> tuple[str, str]:
+    def _get_line_name_and_color(self, line_code: str) -> tuple[str, str, str]:
+        # ✨ 升級：讓此函式同時回傳 CSS class 名稱
         line_map = {
-            'BL': ('板南線', '藍線'), 'BR': ('文湖線', '棕線'), 'R': ('淡水信義線', '紅線'),
-            'G': ('松山新店線', '綠線'), 'O': ('中和新蘆線', '橘線'), 'Y': ('環狀線', '黃線')
+            'BL': ('板南線', '藍線', 'line-bl'), 
+            'BR': ('文湖線', '棕線', 'line-br'), 
+            'R': ('淡水信義線', '紅線', 'line-r'),
+            'G': ('松山新店線', '綠線', 'line-g'), 
+            'O': ('中和新蘆線', '橘線', 'line-o'), 
+            'Y': ('環狀線', '黃線', 'line-y')
         }
-        return line_map.get(line_code, (line_code, '未知顏色'))
+        return line_map.get(line_code, (line_code, '未知顏色', ''))
 
     def _build_metro_graph(self) -> nx.Graph:
         # ... 此方法與上一版相同，為節省篇幅省略 ...
@@ -84,7 +89,7 @@ class RoutingManager:
             if not line_code_match:
                 continue
             line_code = line_code_match.group(1)
-            line_name, line_color = self._get_line_name_and_color(line_code)
+            line_name, line_color, _ = self._get_line_name_and_color(line_code)
 
             if line_name not in self.line_details:
                 terminus1_id = stations_on_this_route[0]['StationID']
@@ -117,61 +122,72 @@ class RoutingManager:
 
     def _generate_directions_from_ids(self, path_ids: List[str]) -> List[str]:
         """
-        【✨最終修正版 v2✨】根據車站ID列表，透過偵測「路線變化」來生成轉乘指引。
+        【✨最終修正版 v3.1 - 顏色增強優化版✨】
+        根據車站ID列表，透過偵測「路線變化」來生成帶有顏色的轉乘指引。
+        此版本使用更穩健的方式來獲取路線顏色。
         """
         if not path_ids or len(path_ids) < 2:
             return ["路徑資訊不足，無法生成指引。"]
 
+        # 建立一個從路線中文名反查路線代碼(SCODE)的字典，以便後續查找CSS class
+        # 例如: {'板南線': 'BL', '淡水信義線': 'R', ...}
+        line_name_to_code_map = {
+            details['line_name']: code
+            for code, details in {
+                'BL': {'line_name': '板南線'}, 'BR': {'line_name': '文湖線'},
+                'R': {'line_name': '淡水信義線'}, 'G': {'line_name': '松山新店線'},
+                'O': {'line_name': '中和新蘆線'}, 'Y': {'line_name': '環狀線'}
+            }.items()
+        }
+
         directions = []
-        
-        # 1. 起點指引
         start_node_name = self.station_id_to_name.get(path_ids[0], path_ids[0])
         directions.append(f"從「{start_node_name}」站上車。")
 
-        # 2. 路線搭乘與轉乘指引
         current_line = None
         for i in range(len(path_ids) - 1):
             u_id, v_id = path_ids[i], path_ids[i+1]
-            
+
             if not self.graph.has_edge(u_id, v_id): continue
             edge_data = self.graph.get_edge_data(u_id, v_id)
-            
-            # 我們只關心 'ride' 類型的邊，因為 'transfer' 邊不會出現在API路徑中
+
             if edge_data.get('type') == 'ride':
                 line_name = edge_data.get('line_name')
-                
-                # 如果路線發生變化，代表這是一個轉乘點
+
                 if line_name != current_line:
-                    # 如果不是第一段路程，就產生轉乘提示
+                    transfer_station_name = self.station_id_to_name.get(u_id, u_id)
+
+                    # ✨ 核心修改：使用反查字典來獲取路線代碼
+                    line_code = line_name_to_code_map.get(line_name, '')
+                    _, _, line_class = self._get_line_name_and_color(line_code)
+
+                    # 使用 HTML span 標籤和 CSS class 來包裹路線名稱
+                    colored_line_name = f'<span class="{line_class}">{line_name} ({self.line_details.get(line_name, {}).get("color", "")})</span>'
+
                     if current_line is not None:
-                        transfer_station_name = self.station_id_to_name.get(u_id, u_id)
-                        line_info = self.line_details.get(line_name)
-                        line_color = line_info['color'] if line_info else '未知顏色'
-                        directions.append(f"在「{transfer_station_name}」站，轉乘【{line_name} ({line_color})】。")
+                        directions.append(f"在「{transfer_station_name}」站，轉乘 {colored_line_name}。")
 
                     current_line = line_name
-                    
-                    # 產生搭乘方向指引
+
+                    # 產生搭乘方向指引 (此部分邏輯不變)
                     line_info = self.line_details.get(current_line)
                     if line_info:
-                        line_color = line_info['color']
                         terminus1, terminus2 = line_info['terminus']
                         try:
                             dist_u_t1 = nx.shortest_path_length(self.graph, source=u_id, target=terminus1)
                             dist_v_t1 = nx.shortest_path_length(self.graph, source=v_id, target=terminus1)
                             direction_station_id = terminus1 if dist_v_t1 < dist_u_t1 else terminus2
                             direction_station_name = self.station_id_to_name.get(direction_station_id, direction_station_id)
-                            directions.append(f"搭乘【{current_line} ({line_color})】，往「{direction_station_name}」方向。")
+                            directions.append(f"搭乘 {colored_line_name}，往「{direction_station_name}」方向。")
                         except (nx.NetworkXNoPath, nx.NodeNotFound):
-                            directions.append(f"搭乘【{current_line} ({line_color})】。")
+                            directions.append(f"搭乘 {colored_line_name}。")
                     else:
-                        directions.append(f"搭乘【{current_line}】。")
+                        directions.append(f"搭乘 {colored_line_name}。")
 
-        # 3. 終點指引
         end_node_name = self.station_id_to_name.get(path_ids[-1], path_ids[-1])
         directions.append(f"在「{end_node_name}」站下車，抵達目的地。")
 
-        return list(dict.fromkeys(directions)) # 移除重複語句
+        return list(dict.fromkeys(directions)) # 使用 dict.fromkeys 移除重複語句，更高效
 
     # ... find_shortest_path 和 generate_directions_from_path 方法與上一版相同 ...
     # ... 為節省篇幅省略，請保留您檔案中這兩個方法的完整程式碼 ...
@@ -251,3 +267,69 @@ class RoutingManager:
             "lines": lines_summary,
             "message": f"台北捷運目前有 {len(lines_summary)} 條主要路線。"
         }
+
+    def resolve_direction(self, start_station_name: str, direction_hint: str) -> List[str]:
+        """
+        【智慧方向解析 v2.0】
+        根據起點站和方向提示（可以是終點站或任何一個中間站），解析出實際的列車終點站名稱。
+        """
+        start_ids = self.station_manager.get_station_ids(start_station_name)
+        hint_ids = self.station_manager.get_station_ids(direction_hint)
+        if not start_ids or not hint_ids:
+            logger.warning(f"無法解析起點 '{start_station_name}' 或方向提示 '{direction_hint}' 的 ID。")
+            return []
+
+        possible_termini_ids = set()
+
+        # 遍歷我們擁有的所有路線詳細資訊
+        for line_name, details in self.line_details.items():
+            line_stations = details.get('stations', []) # 該路線的所有車站 ID 列表
+            
+            # 檢查這條路線是否「同時」包含起點站和方向提示站
+            start_id_on_line = next((sid for sid in start_ids if sid in line_stations), None)
+            hint_id_on_line = next((hid for hid in hint_ids if hid in line_stations), None)
+
+            # 如果兩個站都在同一條路線上
+            if start_id_on_line and hint_id_on_line:
+                start_pos = line_stations.index(start_id_on_line)
+                hint_pos = line_stations.index(hint_id_on_line)
+
+                # 如果索引不同（避免使用者輸入同一個站）
+                if start_pos != hint_pos:
+                    # 如果提示站的索引 > 起點站索引，代表列車是往路線列表的「末端」終點站開
+                    if hint_pos > start_pos:
+                        possible_termini_ids.add(details['terminus'][1]) # terminus 是一個 [起點ID, 終點ID] 的列表
+                    # 反之，則是往列表的「開頭」終點站開
+                    else:
+                        possible_termini_ids.add(details['terminus'][0])
+        
+        if not possible_termini_ids:
+            logger.warning(f"在任何單一路線上都找不到從 '{start_station_name}' 到 '{direction_hint}' 的有效方向。")
+            return []
+
+        # 將找到的終點站 ID 轉換回標準化後的站名
+        final_termini_names = [self.station_manager.resolve_station_alias(self.station_id_to_name.get(tid, '')) for tid in possible_termini_ids]
+        
+        # 過濾掉空字串的結果並回傳
+        return [name for name in final_termini_names if name]
+    
+    def get_terminal_stations_for(self, station_name: str) -> List[str]:
+        """
+        【新功能】根據提供的站名，找出該站所在的所有路線，並回傳這些路線的終點站名稱。
+        """
+        station_ids = self.station_manager.get_station_ids(station_name)
+        if not station_ids:
+            return []
+
+        terminal_stations = set()
+        for line_name, details in self.line_details.items():
+            line_stations = details.get('stations', [])
+            # 檢查這個站的任何一個 ID 是否存在於這條路線上
+            if any(sid in line_stations for sid in station_ids):
+                # 將這條路線的兩個終點站都加入到集合中
+                for terminus_id in details.get('terminus', []):
+                    terminus_name = self.station_id_to_name.get(terminus_id)
+                    if terminus_name:
+                        terminal_stations.add(terminus_name)
+
+        return sorted(list(terminal_stations))

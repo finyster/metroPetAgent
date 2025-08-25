@@ -1186,7 +1186,7 @@ def predict_train_congestion(
     # --- ✨✨✨【修正結束】✨✨✨
 
     return json.dumps({"message": final_message}, ensure_ascii=False)
-
+'''
 @tool
 def query_user_manual(user_question: str) -> str:
     """
@@ -1236,7 +1236,69 @@ def query_user_manual(user_question: str) -> str:
     logger.warning(f"--- [RAG 手冊] 所有找到的文件都未通過相關性門檻。 ---")
     return json.dumps({"message": "嗯...關於這個問題，我的手冊裡好像沒有提到耶。您可以換個方式問我嗎？"}, ensure_ascii=False)
     # --- ✨✨✨【修正結束】✨✨✨
+'''
 
+@tool
+def get_user_manual_info(topic: str, category: Optional[str] = None) -> str:
+    """
+    【使用者手冊查詢 v2.0】
+    查詢關於此 AI 助理的資訊。
+    - 當使用者初次詢問功能時，使用 topic='功能' 來獲取功能總覽。
+    - 當使用者想深入了解某個類別時，同時傳入 topic='功能' 和 category='類別名稱' (例如 '通勤與返家')。
+    - 當使用者問 '你是誰' 時，使用 topic='介紹'。
+    """
+    logger.info(f"📖 [使用者手冊 v2.0] 查詢主題: {topic}, 類別: {category}")
+    manual = local_data_manager.user_manual
+    if not manual:
+        return json.dumps({"error": "找不到使用者手冊資料。"}, ensure_ascii=False)
+
+    usage_guide = manual.get("usage_guide", {})
+
+    # 如果指定了 category，就回傳該類別的詳細資訊
+    if category:
+        category_details = next((sc for sc in usage_guide.get("scenarios", []) if category in sc.get("scenario_title", "")), None)
+        if not category_details:
+            return json.dumps({"error": f"找不到名為 '{category}' 的功能類別。"}, ensure_ascii=False)
+        
+        message_parts = [f"好的，這是有關 **{category_details.get('scenario_title')}** 的詳細用法：\n"]
+        for example in category_details.get("examples", []):
+            message_parts.append(f"- **當你問**:「{example.get('question')}」")
+            message_parts.append(f"  - **我會**: {example.get('capability')}")
+        
+        return json.dumps({
+            "topic": "功能詳情",
+            "category": category,
+            "message": "\n".join(message_parts)
+        }, ensure_ascii=False, indent=2)
+
+    # 如果 topic 是 '功能' 或 '用法'，但沒有指定 category，則回傳總覽
+    if "功能" in topic or "用法" in topic:
+        categories = usage_guide.get("categories", [])
+        if not categories:
+            return json.dumps({"error": "手冊中找不到功能類別。"}, ensure_ascii=False)
+
+        message_parts = [
+            usage_guide.get('description', '我主要有以下幾大類功能：'),
+            ""
+        ]
+        for cat in categories:
+            message_parts.append(f"**{cat.get('title')}**: {cat.get('summary')}")
+        
+        message_parts.append("\n若想知道某個類別的詳細用法，可以問我，例如：「跟我說說『通勤與返家』功能的用法」")
+
+        return json.dumps({
+            "topic": "功能總覽",
+            "message": "\n".join(message_parts)
+        }, ensure_ascii=False, indent=2)
+
+    # 預設回傳歡迎與介紹訊息 (topic='介紹')
+    welcome_info = manual.get("welcome", {})
+    message = (
+        f"**{welcome_info.get('title', '哈囉！')}**\n\n"
+        f"{welcome_info.get('greeting')}\n\n"
+        f"你可以問我**「你有什麼功能？」**來看看我能為你做些什麼喔！"
+    )
+    return json.dumps({"topic": "整體介紹", "message": message}, ensure_ascii=False, indent=2)
 
 # =====================================================================
 # 最終工具列表 (Final Tool List)
@@ -1261,7 +1323,8 @@ all_tools = [
     list_available_food_maps,
     # 系統資訊
     query_metro_network,
-    query_user_manual,
+    #query_user_manual,
+    get_user_manual_info,
 ]
 
 logger.info(f"--- [Tools] 總共 {len(all_tools)} 個工具已成功註冊並準備就緒。 ---")

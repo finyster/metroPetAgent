@@ -25,6 +25,7 @@ python build_database.py --name lost_and_found
 python build_database.py --name stations
 python build_database.py --name facilities
 python build_lost_item_index.py
+python build_manual_index.py
 
 # 1) 進到專案資料夾
 cd D:\台北捷運github暫存\metroPetAgent

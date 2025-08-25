@@ -16,11 +16,12 @@
 import json
 import logging
 import random
-import re
+import re, os
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional, Dict, List, Any
+import numpy as np
 
 import dateparser
 from dotenv import load_dotenv
@@ -35,6 +36,15 @@ from utils.exceptions import (DataLoadError, RouteNotFoundError,
 from utils.time_parser import parse_countdown_to_seconds
 from utils.station_name_normalizer import normalize_station_name
 
+# ... (其他 import)
+# ⚠️ 注意：我們需要一個新的 ManualSearchService，和 VectorSearchService 很像
+# 為了簡化，我們先在這裡直接載入索引，未來您可以將其封裝成一個新服務
+from sentence_transformers import SentenceTransformer
+import faiss
+from langchain_groq import ChatGroq # 導入 ChatGroq
+
+
+
 
 # ---------------------------------------------------------------------
 # 2. 基本設定 (Basic Configuration)
@@ -46,6 +56,29 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parents[1]
 load_dotenv(BASE_DIR / ".env")
 
+
+# --- RAG 手冊搜尋設定 ---
+manual_index_path = os.path.join(config.DATA_DIR, 'manual_vector.index')
+manual_chunks_path = os.path.join(config.DATA_DIR, 'manual_chunks.json')
+manual_search_is_ready = False
+try:
+    manual_retriever_model = SentenceTransformer('distiluse-base-multilingual-cased-v1')
+    manual_index = faiss.read_index(manual_index_path)
+    with open(manual_chunks_path, 'r', encoding='utf-8') as f:
+        import json
+        manual_chunks = json.load(f)
+    manual_search_is_ready = True
+    logger.info("--- ✅ [RAG 手冊] 向量索引已成功載入。 ---")
+except Exception as e:
+    logger.warning(f"--- ⚠️ [RAG 手冊] 載入向量索引失敗: {e} ---")
+
+# --- 新增一個專門用於「資訊提煉」的、便宜且快速的 LLM ---
+distiller_llm = ChatGroq(
+    model="llama3-8b-8192",
+    temperature=0.0,
+    groq_api_key=config.GROQ_API_KEY
+)
+# --- RAG 設定結束 ---
 
 # ---------------------------------------------------------------------
 # 3. 服務實例化 (Service Instantiation)
@@ -1155,64 +1188,54 @@ def predict_train_congestion(
     return json.dumps({"message": final_message}, ensure_ascii=False)
 
 @tool
-def get_user_manual_info(topic: str, category: Optional[str] = None) -> str:
+def query_user_manual(user_question: str) -> str:
     """
-    【使用者手冊查詢 v2.0】
-    查詢關於此 AI 助理的資訊。
-    - 當使用者初次詢問功能時，使用 topic='功能' 來獲取功能總覽。
-    - 當使用者想深入了解某個類別時，同時傳入 topic='功能' 和 category='類別名稱' (例如 '通勤與返家')。
-    - 當使用者問 '你是誰' 時，使用 topic='介紹'。
+    【RAG 知識問答專家 v2.2 - 最終微調版】
+    當使用者提出關於如何使用此 AI 助理、有哪些功能，或任何開放式問題時使用此工具。
+    它會根據使用者的問題，透過語意搜尋找到最相關的段落，並在相似度足夠高時提供精準的回答。
     """
-    logger.info(f"📖 [使用者手冊 v2.0] 查詢主題: {topic}, 類別: {category}")
-    manual = local_data_manager.user_manual
-    if not manual:
-        return json.dumps({"error": "找不到使用者手冊資料。"}, ensure_ascii=False)
+    logger.info(f"📖 [RAG 手冊 v2.2] 正在根據問題搜尋知識庫: '{user_question}'")
+    
+    if not manual_search_is_ready:
+        return json.dumps({"error": "抱歉，我的知識庫目前無法查閱，請稍後再試。"}, ensure_ascii=False)
 
-    usage_guide = manual.get("usage_guide", {})
-
-    # 如果指定了 category，就回傳該類別的詳細資訊
-    if category:
-        category_details = next((sc for sc in usage_guide.get("scenarios", []) if category in sc.get("scenario_title", "")), None)
-        if not category_details:
-            return json.dumps({"error": f"找不到名為 '{category}' 的功能類別。"}, ensure_ascii=False)
+    query_embedding = manual_retriever_model.encode([user_question])
+    query_embedding = np.array(query_embedding).astype('float32')
+    
+    distances, indices = manual_index.search(query_embedding, k=1)
+    
+    # --- ✨✨✨【核心修正點：最終參數微調】✨✨✨
+    # 將 L2 距離的門檻值從 1.2 提高到 1.25。
+    # 這個微小的調整，就能讓 1.2170 這個優質的搜尋結果順利通過。
+    DISTANCE_THRESHOLD = 1.25
+    
+    if len(indices[0]) > 0:
+        best_distance = distances[0][0]
+        logger.info(f"--- [RAG 手冊] 找到最相近的文件，距離為: {best_distance:.4f} (門檻為 < {DISTANCE_THRESHOLD}) ---")
         
-        message_parts = [f"好的，這是有關 **{category_details.get('scenario_title')}** 的詳細用法：\n"]
-        for example in category_details.get("examples", []):
-            message_parts.append(f"- **當你問**:「{example.get('question')}」")
-            message_parts.append(f"  - **我會**: {example.get('capability')}")
-        
-        return json.dumps({
-            "topic": "功能詳情",
-            "category": category,
-            "message": "\n".join(message_parts)
-        }, ensure_ascii=False, indent=2)
+        if best_distance < DISTANCE_THRESHOLD:
+            best_match_index = indices[0][0]
+            retrieved_chunk = manual_chunks[best_match_index]
+            
+            final_message = f"""
+            根據我的使用者手冊，這裡有一段能回答「{user_question}」的相關資訊：
+            
+            ---
+            {retrieved_chunk}
+            ---
+            
+            希望這段說明對您有幫助！
+            """
 
-    # 如果 topic 是 '功能' 或 '用法'，但沒有指定 category，則回傳總覽
-    if "功能" in topic or "用法" in topic:
-        categories = usage_guide.get("categories", [])
-        if not categories:
-            return json.dumps({"error": "手冊中找不到功能類別。"}, ensure_ascii=False)
+            return json.dumps({
+                "user_question": user_question,
+                "retrieved_context": retrieved_chunk,
+                "message": final_message.strip()
+            }, ensure_ascii=False, indent=2)
 
-        message_parts = [
-            usage_guide.get('description', '我主要有以下幾大類功能：'),
-            ""
-        ]
-        for cat in categories:
-            message_parts.append(f"**{cat.get('title')}**: {cat.get('summary')}")
-
-        return json.dumps({
-            "topic": "功能總覽",
-            "message": "\n".join(message_parts)
-        }, ensure_ascii=False, indent=2)
-
-    # 預設回傳歡迎與介紹訊息
-    welcome_info = manual.get("welcome", {})
-    message = (
-        f"**{welcome_info.get('title', '哈囉！')}**\n\n"
-        f"{welcome_info.get('greeting')}\n\n"
-        f"你可以問我**「你有什麼功能？」**來看看我能為你做些什麼喔！"
-    )
-    return json.dumps({"topic": "整體介紹", "message": message}, ensure_ascii=False, indent=2)
+    logger.warning(f"--- [RAG 手冊] 所有找到的文件都未通過相關性門檻。 ---")
+    return json.dumps({"message": "嗯...關於這個問題，我的手冊裡好像沒有提到耶。您可以換個方式問我嗎？"}, ensure_ascii=False)
+    # --- ✨✨✨【修正結束】✨✨✨
 
 
 # =====================================================================
@@ -1238,7 +1261,7 @@ all_tools = [
     list_available_food_maps,
     # 系統資訊
     query_metro_network,
-    get_user_manual_info,
+    query_user_manual,
 ]
 
 logger.info(f"--- [Tools] 總共 {len(all_tools)} 個工具已成功註冊並準備就緒。 ---")

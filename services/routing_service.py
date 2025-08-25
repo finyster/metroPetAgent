@@ -157,15 +157,14 @@ class RoutingManager:
                 if line_name != current_line:
                     transfer_station_name = self.station_id_to_name.get(u_id, u_id)
 
-                    # ✨ 核心修改：使用反查字典來獲取路線代碼
-                    line_code = line_name_to_code_map.get(line_name, '')
-                    _, _, line_class = self._get_line_name_and_color(line_code)
-
-                    # 使用 HTML span 標籤和 CSS class 來包裹路線名稱
-                    colored_line_name = f'<span class="{line_class}">{line_name} ({self.line_details.get(line_name, {}).get("color", "")})</span>'
+                    # --- ✨✨✨【核心修改處】✨✨✨
+                    # 移除了所有 HTML span 標籤的生成邏輯
+                    line_color = self.line_details.get(line_name, {}).get("color", "")
+                    plain_text_line_name = f"{line_name} ({line_color})"
+                    # --- ✨✨✨【修改結束】✨✨✨
 
                     if current_line is not None:
-                        directions.append(f"在「{transfer_station_name}」站，轉乘 {colored_line_name}。")
+                        directions.append(f"在「{transfer_station_name}」站，轉乘 {plain_text_line_name}。")
 
                     current_line = line_name
 
@@ -178,11 +177,11 @@ class RoutingManager:
                             dist_v_t1 = nx.shortest_path_length(self.graph, source=v_id, target=terminus1)
                             direction_station_id = terminus1 if dist_v_t1 < dist_u_t1 else terminus2
                             direction_station_name = self.station_id_to_name.get(direction_station_id, direction_station_id)
-                            directions.append(f"搭乘 {colored_line_name}，往「{direction_station_name}」方向。")
+                            directions.append(f"搭乘 {plain_text_line_name}，往「{direction_station_name}」方向。")
                         except (nx.NetworkXNoPath, nx.NodeNotFound):
-                            directions.append(f"搭乘 {colored_line_name}。")
+                            directions.append(f"搭乘 {plain_text_line_name}。")
                     else:
-                        directions.append(f"搭乘 {colored_line_name}。")
+                        directions.append(f"搭乘 {plain_text_line_name}。")
 
         end_node_name = self.station_id_to_name.get(path_ids[-1], path_ids[-1])
         directions.append(f"在「{end_node_name}」站下車，抵達目的地。")

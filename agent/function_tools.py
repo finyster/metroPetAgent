@@ -478,22 +478,24 @@ def get_station_facilities(station_name: str) -> str:
 # ---------------------------------------------------------------------
 # 6. 遺失物智慧搜尋
 # ---------------------------------------------------------------------
+# in agent/function_tools.py
+
 @tool
 def search_lost_and_found(
-    item_description: str | None = None, 
+    item_description: str | None = None,
     station_name: str | None = None,
     date_str: str | None = None
 ) -> str:
     """
-    【遺失物智慧搜尋專家】
+    【遺失物智慧搜尋專家 v2.0 - 加權版】
     根據物品的模糊描述、可能的地點和日期（例如'昨天'或'2025/08/02'）來搜尋遺失物。
+    此版本採用加權計分，優先顯示最直接相關的物品。
     """
-    logger.info(f"[智慧遺失物搜尋] 正在搜尋: 物品='{item_description}', 車站='{station_name}', 日期='{date_str}'")
-    
+    logger.info(f"[智慧遺失物搜尋 v2.0] 正在搜尋: 物品='{item_description}', 車站='{station_name}', 日期='{date_str}'")
+
     if not item_description and not station_name:
         return json.dumps({"error": "缺少搜尋條件", "message": "請至少告訴我物品的描述或可能的車站喔！"}, ensure_ascii=False)
 
-    # --- 【✨核心擴充✨】建立一個超級豐富的「物品別名地圖」 ---
     item_alias_map = {
         # ===== 電子票證類 =====
         "悠遊卡": "電子票證", "一卡通": "電子票證", "icash": "電子票證",
@@ -548,17 +550,18 @@ def search_lost_and_found(
         "水壺": "水壺", "保溫瓶": "保溫瓶",
         "娃娃": "玩偶", "公仔": "玩偶",
     }
-    # ----------------------------------------------------
-
+    # ... (日期和地點處理邏輯保持不變) ...
     # --- 步驟 1: 處理日期 ---
     search_date = None
     if date_str:
         try:
+            # 支援 '昨天' 和 '今天'
             if "昨天" in date_str:
                 search_date = (datetime.now() - timedelta(days=1)).strftime('%Y/%m/%d')
             elif "今天" in date_str:
                 search_date = datetime.now().strftime('%Y/%m/%d')
             else:
+                # 嘗試解析標準格式
                 search_date = datetime.strptime(date_str, '%Y/%m/%d').strftime('%Y/%m/%d')
             logger.info(f"日期條件解析成功: {search_date}")
         except ValueError:
@@ -570,7 +573,7 @@ def search_lost_and_found(
     if station_name:
         norm_station_name = station_name.replace("站", "").replace("駅", "")
         search_locations.add(norm_station_name)
-        
+
         station_ids = station_manager.get_station_ids(station_name)
         if isinstance(station_ids, list) and station_ids:
             line_prefix_match = re.match(r"([A-Z]+)", station_ids[0])
@@ -582,26 +585,32 @@ def search_lost_and_found(
                     search_locations.add(line_name)
         logger.info(f"地點條件擴展為: {search_locations}")
 
-    # --- 步驟 3: 處理物品 (精準別名 -> 語意搜尋) ---
-    search_item_terms = set()
+    # --- ✨✨✨【核心修改：分層加權搜尋邏輯】✨✨✨
+
+    # --- 步驟 3: 建立分層的搜尋關鍵字 ---
+    primary_terms = set()
+    secondary_terms = set()
     if item_description:
-        # 1. 優先使用「精準別名」進行轉換
         norm_item_desc = item_description.lower()
+        primary_terms.add(norm_item_desc)
+
+        # 1. 優先使用「精準別名」進行轉換，加入主要關鍵字
         if norm_item_desc in item_alias_map:
             official_item_name = item_alias_map[norm_item_desc]
-            search_item_terms.add(official_item_name.lower())
-            logger.info(f"物品 '{norm_item_desc}' 透過別名精準匹配到 '{official_item_name}'")
-        
-        # 2. 接著，使用「向量搜尋」來尋找其他語意相似的詞
-        found_names = lost_item_search_service.find_similar_items(item_description, top_k=3, threshold=0.6)
-        if found_names:
-            search_item_terms.update(name.lower() for name in found_names)
-            
-        # 3. 無論如何，都將使用者原始的描述也加入搜尋目標
-        search_item_terms.add(norm_item_desc)
-        logger.info(f"物品條件擴展為: {search_item_terms}")
+            primary_terms.add(official_item_name.lower())
+            logger.info(f"物品 '{norm_item_desc}' 透過別名精準匹配到 '{official_item_name}' (主要關鍵字)")
 
-    # --- 步驟 4: 載入資料並執行最終篩選 ---
+        # 2. 接著，使用「向量搜尋」來尋找其他語意相似的詞，但提高門檻，並加入次要關鍵字
+        # ✨ 將相似度門檻從 0.6 提高到 0.7，過濾掉「紙袋」這類不相關的結果
+        found_names = lost_item_search_service.find_similar_items(item_description, top_k=3, threshold=0.7)
+        if found_names:
+            secondary_terms.update(name.lower() for name in found_names)
+
+    logger.info(f"主要搜尋詞: {primary_terms}")
+    logger.info(f"次要搜尋詞: {secondary_terms}")
+
+
+    # --- 步驟 4: 載入資料並執行初步篩選 ---
     try:
         with open(config.LOST_AND_FOUND_DATA_PATH, 'r', encoding='utf-8') as f:
             all_items = json.load(f)
@@ -609,17 +618,37 @@ def search_lost_and_found(
         logger.error(f"遺失物資料庫檔案遺失或損毀: {config.LOST_AND_FOUND_DATA_PATH}")
         return json.dumps({"error": "資料庫錯誤", "message": "抱歉，遺失物資料庫好像不見了。"}, ensure_ascii=False)
 
-    filtered_items = all_items
+    # 初步篩選：日期和地點
+    pre_filtered_items = all_items
     if search_date:
-        filtered_items = [item for item in filtered_items if item.get('col_Date') == search_date]
+        pre_filtered_items = [item for item in pre_filtered_items if item.get('col_Date') == search_date]
     if search_locations:
-        filtered_items = [item for item in filtered_items if any(loc.lower() in item.get('col_TRTCStation', '').lower() for loc in search_locations)]
-    if search_item_terms:
-        filtered_items = [item for item in filtered_items if any(term in item.get('col_LoseName', '').lower() for term in search_item_terms)]
+        pre_filtered_items = [item for item in pre_filtered_items if any(loc.lower() in item.get('col_TRTCStation', '').lower() for loc in search_locations)]
 
-    # --- 步驟 5: 格式化並回傳結果 ---
-    top_results = filtered_items[:10]
-    
+    # --- 步驟 5: 加權計分與最終排序 ---
+    scored_items = []
+    for item in pre_filtered_items:
+        item_name_lower = item.get('col_LoseName', '').lower()
+        score = 0
+        
+        # 如果物品名稱包含「主要關鍵字」，給予高分 (10分)
+        if any(term in item_name_lower for term in primary_terms):
+            score += 10
+        # 如果物品名稱包含「次要關鍵字」，給予次高分 (5分)
+        elif any(term in item_name_lower for term in secondary_terms):
+            score += 5
+        
+        if score > 0:
+            item['score'] = score
+            scored_items.append(item)
+
+    # 按照分數 > 日期排序
+    scored_items.sort(key=lambda x: (x['score'], x.get('col_Date', '')), reverse=True)
+
+
+    # --- 步驟 6: 格式化並回傳結果 ---
+    top_results = scored_items[:10]
+
     if not top_results:
         return json.dumps({"count": 0, "message": "很抱歉，在資料庫中找不到符合條件的遺失物。"}, ensure_ascii=False)
 
@@ -627,13 +656,12 @@ def search_lost_and_found(
         {"拾獲日期": item.get("col_Date"), "物品名稱": item.get("col_LoseName"), "拾獲車站": item.get("col_TRTCStation"), "保管單位": item.get("col_NowPlace")}
         for item in top_results
     ]
-    
+
     return json.dumps({
         "count": len(top_results),
         "message": f"好的，幫您在資料庫中找到了 {len(top_results)} 筆最相關的遺失物資訊：",
         "results": formatted_results
     }, ensure_ascii=False, indent=2)
-
 
 # ---------------------------------------------------------------------
 # 7. 捷運美食搜尋

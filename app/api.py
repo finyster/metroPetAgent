@@ -1,56 +1,100 @@
-# app/api.py (建議修改版)
+# app/api.py (最終 Conversation Summary Memory 增強版)
 
 from fastapi import APIRouter, HTTPException
 import logging
-import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
+# 從 schemas.py 匯入 API 的請求與回應模型
 from app.schemas import ChatRequest, ChatResponse, ChatHistory
-# ✨ 這次我們只需要 agent_executor 和 get_language_instruction
-from agent.agent import agent_executor, get_language_instruction 
-# 移除了 'agent' 和 'get_user_manual_info' 的導入，因為 executor 會處理
+
+# --- 核心模組匯入 ---
+# 導入 Agent 的核心組件
+from agent.agent import agent, all_tools, get_language_instruction
+# 導入 LangChain 的進階記憶體模組
+from langchain.memory import ConversationSummaryBufferMemory
+# 導入 Agent 執行器
+from langchain.agents import AgentExecutor
+# 導入 LLM，用於建立摘要
+from langchain_groq import ChatGroq
+# 導入設定檔
+import config
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# --- 記憶體與 Agent 執行器設定 ---
+
+# 建立一個專門用於「對話摘要」的、較輕量的 LLM。
+# 這可以讓摘要過程更快速、成本更低。
+memory_llm = ChatGroq(model="llama3-8b-8192", groq_api_key=config.GROQ_API_KEY)
+
+# 建立一個全域的 AgentExecutor 實例。
+# 我們會在每一次的 API 請求中，動態地為它 "附加" 一個獨立的記憶體物件。
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=all_tools,
+    verbose=True, # 在後台顯示 Agent 的詳細思考過程，方便除錯
+    handle_parsing_errors="抱歉，我好像有點理解錯誤，可以請您換個方式問我嗎？"
+)
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_agent(request: ChatRequest):
     """
-    處理聊天請求的核心 API 端點（簡化版）。
+    處理聊天請求的核心 API 端點（已升級為 Conversation Summary Memory）。
     """
     try:
-        # --- 歷史紀錄控管邏輯 (維持不變) ---
-        MAX_HISTORY_TURNS = 10
-        history_tuples = [(item.role, item.content) for item in request.chat_history]
-        if len(history_tuples) > MAX_HISTORY_TURNS:
-            logger.info(f"--- 📜 對話歷史過長 ({len(history_tuples)} > {MAX_HISTORY_TURNS})，進行裁切 ---")
-            history_tuples = history_tuples[-MAX_HISTORY_TURNS:]
-
-        # --- ✨✨✨【核心修改：移除攔截邏輯，直接呼叫 AgentExecutor】✨✨✨
+        # --- 步驟 1: 為本次對話建立並載入「摘要記憶體」 ---
         
+        # 建立一個新的 ConversationSummaryBufferMemory 物件。
+        # 當歷史紀錄的 Token 總量超過 max_token_limit 時，它會自動呼叫 LLM
+        # 將最舊的對話內容「壓縮」成一段摘要，以節省空間。
+        memory = ConversationSummaryBufferMemory(
+            llm=memory_llm,
+            max_token_limit=1500,       # 建議的 Token 上限，可容納近期詳細對話 + 遠期摘要
+            memory_key="chat_history", # 必須對應 Agent Prompt 中的 MessagesPlaceholder
+            input_key="input",         # 必須明確告知 Memory 哪個是使用者的輸入
+            return_messages=True
+        )
+        
+        # 將前端傳來的歷史紀錄 "載入" 到這個新的 Memory 物件中，
+        # 讓 Agent 能夠 "記住" 之前的對話上下文。
+        for item in request.chat_history:
+            if item.role == "user":
+                memory.chat_memory.add_user_message(item.content)
+            elif item.role == "assistant":
+                memory.chat_memory.add_ai_message(item.content)
+
+        # 將這個載入了歷史的 memory 物件 "附加" 到我們的 AgentExecutor 上
+        agent_executor.memory = memory
+
+        # --- 步驟 2: 準備並執行 Agent ---
         lang_name, lang_instruction = get_language_instruction(request.language)
         
-        # 直接建立完整的輸入 payload
+        # 準備傳遞給 Agent 的參數。因為 memory 會自動處理 chat_history，所以這裡非常乾淨。
         input_payload = {
             "input": request.message,
-            "chat_history": history_tuples,
             "language_name": lang_name,
             "language_instruction": lang_instruction
         }
         
-        logger.info("🚀 正在執行完整的 AgentExecutor 流程...")
-        # 直接、統一地由 agent_executor 處理所有請求
+        logger.info("🚀 正在執行帶有 Summary Buffer Memory 的 AgentExecutor 流程...")
+        
+        # 執行 Agent
         result = await agent_executor.ainvoke(input_payload)
         final_output = result['output']
-        
-        # --- ✨✨✨【修改結束】✨✨✨
 
-        # --- 更新歷史紀錄與回傳 (維持不變) ---
-        updated_history = request.chat_history + [
-            ChatHistory(role="user", content=request.message),
-            ChatHistory(role="assistant", content=final_output)
+        # --- 步驟 3: 從 Memory 取回更新後的歷史紀錄並回傳 ---
+        
+        # 執行完畢後，memory 中已經包含了最新的問與答，
+        # 並且可能已經將最舊的訊息「摘要」過了。
+        updated_history_from_memory = memory.chat_memory.messages
+        
+        # 將 LangChain 的 Message 物件轉換為 API 需要的字典格式
+        history_dicts = [
+            {"role": "user" if msg.type == "human" else "assistant", "content": msg.content}
+            for msg in updated_history_from_memory
         ]
-        history_dicts = [item.model_dump() for item in updated_history]
         
         return ChatResponse(
             response=final_output,
@@ -58,4 +102,4 @@ async def chat_with_agent(request: ChatRequest):
         )
     except Exception as e:
         logger.error(f"Agent 執行出錯: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")

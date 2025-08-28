@@ -647,7 +647,7 @@ def search_lost_and_found(
 
 
     # --- 步驟 6: 格式化並回傳結果 ---
-    top_results = scored_items[:10]
+    top_results = scored_items[:5]
 
     if not top_results:
         return json.dumps({"count": 0, "message": "很抱歉，在資料庫中找不到符合條件的遺失物。"}, ensure_ascii=False)

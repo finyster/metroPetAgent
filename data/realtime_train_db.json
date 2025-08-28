@@ -1,27 +1,27 @@
 {
-  "timestamp": "2025-08-25T21:02:44.297516",
+  "timestamp": "2025-08-28T18:10:37.782126",
   "trains": [
     {
       "StationName": "松山機場站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 49 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山國中站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "3 分鐘 20 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 46 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南京復興站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -29,159 +29,159 @@
       "StationName": "忠孝復興站",
       "DestinationName": "南港展覽館站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 7 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "科技大樓站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 0 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "六張犁站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 38 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "麟光站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "0 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 20 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "辛亥站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 34 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 9 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬芳醫院站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 13 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬芳社區站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 36 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "木柵站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "動物園站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 29 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大直站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 47 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "劍南路站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西湖站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "0 分鐘 33 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 30 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "港墘站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 7 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "文德站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "3 分鐘 44 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 30 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "內湖站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 0 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大湖公園站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "葫洲站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "0 分鐘 34 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東湖站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 15 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 18 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港軟體園區站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "4 分鐘 5 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 5 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -189,15 +189,15 @@
       "StationName": "松山機場站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山國中站",
       "DestinationName": "動物園站",
-      "CountDown": "2 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -205,15 +205,15 @@
       "StationName": "南京復興站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝復興站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 56 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -221,15 +221,15 @@
       "StationName": "大安站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "科技大樓站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -237,15 +237,15 @@
       "StationName": "六張犁站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "麟光站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 29 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -253,55 +253,55 @@
       "StationName": "辛亥站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬芳醫院站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 58 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 31 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬芳社區站",
       "DestinationName": "動物園站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 53 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "木柵站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大直站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 26 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "劍南路站",
       "DestinationName": "動物園站",
-      "CountDown": "3 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西湖站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 16 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -309,151 +309,151 @@
       "StationName": "港墘站",
       "DestinationName": "動物園站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "文德站",
       "DestinationName": "動物園站",
-      "CountDown": "2 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "內湖站",
       "DestinationName": "動物園站",
-      "CountDown": "0 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大湖公園站",
       "DestinationName": "動物園站",
-      "CountDown": "3 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 44 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "葫洲站",
       "DestinationName": "動物園站",
-      "CountDown": "1 分鐘 25 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東湖站",
       "DestinationName": "動物園站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港軟體園區站",
       "DestinationName": "動物園站",
-      "CountDown": "2 分鐘 15 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港展覽館站",
       "DestinationName": "動物園站",
-      "CountDown": "0 分鐘 57 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安站",
       "DestinationName": "淡水站",
-      "CountDown": "1 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 26 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "淡水站",
-      "CountDown": "8 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 59 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台大醫院站",
       "DestinationName": "淡水站",
-      "CountDown": "1 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北車站",
       "DestinationName": "淡水站",
-      "CountDown": "2 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 16 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "淡水站",
-      "CountDown": "4 分鐘 48 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 19 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "雙連站",
       "DestinationName": "淡水站",
-      "CountDown": "6 分鐘 11 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 52 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "民權西路站",
       "DestinationName": "淡水站",
-      "CountDown": "7 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 50 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "圓山站",
       "DestinationName": "淡水站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 46 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "劍潭站",
       "DestinationName": "淡水站",
-      "CountDown": "2 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "士林站",
       "DestinationName": "淡水站",
-      "CountDown": "4 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 1 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "芝山站",
       "DestinationName": "淡水站",
-      "CountDown": "5 分鐘 59 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 48 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -461,703 +461,591 @@
       "StationName": "明德站",
       "DestinationName": "淡水站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "石牌站",
       "DestinationName": "淡水站",
-      "CountDown": "1 分鐘 32 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 0 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "唭哩岸站",
       "DestinationName": "淡水站",
-      "CountDown": "3 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 5 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "奇岩站",
       "DestinationName": "淡水站",
-      "CountDown": "5 分鐘 11 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 39 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北投站",
       "DestinationName": "淡水站",
-      "CountDown": "6 分鐘 52 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "6 分鐘 40 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "復興崗站",
       "DestinationName": "淡水站",
-      "CountDown": "1 分鐘 22 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠義站",
       "DestinationName": "淡水站",
-      "CountDown": "3 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 58 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "關渡站",
       "DestinationName": "淡水站",
-      "CountDown": "5 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "竹圍站",
       "DestinationName": "淡水站",
-      "CountDown": "7 分鐘 54 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 35 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "紅樹林站",
       "DestinationName": "淡水站",
-      "CountDown": "0 分鐘 41 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 7 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "象山站",
       "DestinationName": "淡水站",
-      "CountDown": "6 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 28 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北101/世貿站",
       "DestinationName": "淡水站",
-      "CountDown": "7 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "信義安和站",
       "DestinationName": "淡水站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 25 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安森林公園站",
       "DestinationName": "淡水站",
-      "CountDown": "3 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "6 分鐘 25 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東門站",
       "DestinationName": "淡水站",
-      "CountDown": "5 分鐘 25 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 48 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北投站",
       "DestinationName": "新北投站",
-      "CountDown": "2 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安站",
       "DestinationName": "北投站",
-      "CountDown": "8 分鐘 28 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "北投站",
-      "CountDown": "5 分鐘 1 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 51 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台大醫院站",
       "DestinationName": "北投站",
-      "CountDown": "6 分鐘 55 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 45 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北車站",
       "DestinationName": "北投站",
-      "CountDown": "8 分鐘 26 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 16 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "北投站",
-      "CountDown": "0 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "雙連站",
       "DestinationName": "北投站",
-      "CountDown": "2 分鐘 16 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 25 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "民權西路站",
       "DestinationName": "北投站",
-      "CountDown": "3 分鐘 52 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 50 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "圓山站",
       "DestinationName": "北投站",
-      "CountDown": "5 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 46 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "劍潭站",
       "DestinationName": "北投站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 22 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "士林站",
       "DestinationName": "北投站",
-      "CountDown": "1 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 17 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "芝山站",
       "DestinationName": "北投站",
-      "CountDown": "3 分鐘 32 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "明德站",
       "DestinationName": "北投站",
-      "CountDown": "5 分鐘 11 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "石牌站",
       "DestinationName": "北投站",
-      "CountDown": "6 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 59 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "唭哩岸站",
       "DestinationName": "北投站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "奇岩站",
       "DestinationName": "北投站",
-      "CountDown": "1 分鐘 24 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新北投站",
       "DestinationName": "北投站",
-      "CountDown": "7 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "象山站",
+      "DestinationName": "北投站",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "台北101/世貿站",
+      "DestinationName": "北投站",
+      "CountDown": "1 分鐘 24 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "信義安和站",
+      "DestinationName": "北投站",
+      "CountDown": "3 分鐘 23 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安森林公園站",
       "DestinationName": "北投站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 55 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東門站",
       "DestinationName": "北投站",
-      "CountDown": "1 分鐘 50 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 29 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安站",
       "DestinationName": "象山站",
-      "CountDown": "7 分鐘 42 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 28 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "象山站",
-      "CountDown": "0 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台大醫院站",
       "DestinationName": "象山站",
-      "CountDown": "7 分鐘 57 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 13 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北車站",
       "DestinationName": "象山站",
-      "CountDown": "6 分鐘 9 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "象山站",
-      "CountDown": "4 分鐘 34 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "雙連站",
       "DestinationName": "象山站",
-      "CountDown": "3 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "民權西路站",
       "DestinationName": "象山站",
-      "CountDown": "1 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 54 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "圓山站",
       "DestinationName": "象山站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 49 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "劍潭站",
       "DestinationName": "象山站",
-      "CountDown": "6 分鐘 29 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "士林站",
       "DestinationName": "象山站",
-      "CountDown": "4 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 44 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "芝山站",
       "DestinationName": "象山站",
-      "CountDown": "2 分鐘 24 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "明德站",
       "DestinationName": "象山站",
-      "CountDown": "0 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "石牌站",
       "DestinationName": "象山站",
-      "CountDown": "8 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 50 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "唭哩岸站",
       "DestinationName": "象山站",
-      "CountDown": "6 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 43 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "奇岩站",
       "DestinationName": "象山站",
-      "CountDown": "4 分鐘 34 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北投站",
       "DestinationName": "象山站",
-      "CountDown": "2 分鐘 40 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 26 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "復興崗站",
       "DestinationName": "象山站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 49 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠義站",
       "DestinationName": "象山站",
-      "CountDown": "6 分鐘 28 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 46 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "關渡站",
       "DestinationName": "象山站",
-      "CountDown": "4 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "竹圍站",
       "DestinationName": "象山站",
-      "CountDown": "2 分鐘 2 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "紅樹林站",
       "DestinationName": "象山站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 38 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "淡水站",
       "DestinationName": "象山站",
-      "CountDown": "6 分鐘 55 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 48 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北101/世貿站",
       "DestinationName": "象山站",
-      "CountDown": "2 分鐘 9 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 15 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "信義安和站",
       "DestinationName": "象山站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 57 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大安森林公園站",
       "DestinationName": "象山站",
-      "CountDown": "5 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東門站",
       "DestinationName": "象山站",
-      "CountDown": "3 分鐘 54 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中正紀念堂站",
-      "DestinationName": "大安站",
-      "CountDown": "5 分鐘 48 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "台大醫院站",
-      "DestinationName": "大安站",
-      "CountDown": "4 分鐘 35 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "台北車站",
-      "DestinationName": "大安站",
-      "CountDown": "2 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中山站",
-      "DestinationName": "大安站",
-      "CountDown": "0 分鐘 42 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "雙連站",
-      "DestinationName": "大安站",
-      "CountDown": "8 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "民權西路站",
-      "DestinationName": "大安站",
-      "CountDown": "6 分鐘 41 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "圓山站",
-      "DestinationName": "大安站",
-      "CountDown": "4 分鐘 56 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "劍潭站",
-      "DestinationName": "大安站",
-      "CountDown": "2 分鐘 42 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "士林站",
-      "DestinationName": "大安站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "芝山站",
-      "DestinationName": "大安站",
-      "CountDown": "8 分鐘 48 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "明德站",
-      "DestinationName": "大安站",
-      "CountDown": "6 分鐘 59 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "石牌站",
-      "DestinationName": "大安站",
-      "CountDown": "5 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "唭哩岸站",
-      "DestinationName": "大安站",
-      "CountDown": "3 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "奇岩站",
-      "DestinationName": "大安站",
-      "CountDown": "1 分鐘 26 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "北投站",
-      "DestinationName": "大安站",
-      "CountDown": "9 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "大安森林公園站",
-      "DestinationName": "大安站",
-      "CountDown": "2 分鐘 19 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "東門站",
-      "DestinationName": "大安站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 40 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南京復興站",
       "DestinationName": "松山站",
-      "CountDown": "5 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新店站",
       "DestinationName": "松山站",
-      "CountDown": "5 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新店區公所站",
       "DestinationName": "松山站",
-      "CountDown": "0 分鐘 43 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 45 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "七張站",
       "DestinationName": "松山站",
-      "CountDown": "2 分鐘 29 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 44 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大坪林站",
       "DestinationName": "松山站",
-      "CountDown": "4 分鐘 16 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 24 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "景美站",
       "DestinationName": "松山站",
-      "CountDown": "1 分鐘 2 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬隆站",
       "DestinationName": "松山站",
-      "CountDown": "2 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 53 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "公館站",
       "DestinationName": "松山站",
-      "CountDown": "4 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 14 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台電大樓站",
       "DestinationName": "松山站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "古亭站",
       "DestinationName": "松山站",
-      "CountDown": "2 分鐘 9 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 21 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "松山站",
-      "CountDown": "4 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 45 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1165,191 +1053,191 @@
       "StationName": "小南門站",
       "DestinationName": "松山站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "松山站",
-      "CountDown": "0 分鐘 59 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "松山站",
-      "CountDown": "1 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 30 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北門站",
       "DestinationName": "松山站",
-      "CountDown": "3 分鐘 44 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北小巨蛋站",
       "DestinationName": "松山站",
-      "CountDown": "0 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 52 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南京三民站",
       "DestinationName": "松山站",
-      "CountDown": "3 分鐘 0 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 39 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "松山站",
-      "CountDown": "3 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 16 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "小碧潭站",
       "DestinationName": "七張站",
-      "CountDown": "9 分鐘 56 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "8 分鐘 59 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "七張站",
       "DestinationName": "小碧潭站",
-      "CountDown": "1 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 19 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南京復興站",
       "DestinationName": "新店站",
-      "CountDown": "3 分鐘 57 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 30 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新店區公所站",
       "DestinationName": "新店站",
-      "CountDown": "1 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 49 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "七張站",
       "DestinationName": "新店站",
-      "CountDown": "5 分鐘 9 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 15 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大坪林站",
       "DestinationName": "新店站",
-      "CountDown": "3 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "景美站",
       "DestinationName": "新店站",
-      "CountDown": "1 分鐘 15 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 11 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "萬隆站",
       "DestinationName": "新店站",
-      "CountDown": "5 分鐘 54 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 39 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "公館站",
       "DestinationName": "新店站",
-      "CountDown": "3 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台電大樓站",
       "DestinationName": "新店站",
-      "CountDown": "1 分鐘 50 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 2 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "古亭站",
       "DestinationName": "新店站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 53 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "新店站",
-      "CountDown": "3 分鐘 2 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 37 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "小南門站",
       "DestinationName": "新店站",
-      "CountDown": "1 分鐘 20 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 55 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "新店站",
-      "CountDown": "0 分鐘 49 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "新店站",
-      "CountDown": "5 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 16 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北門站",
       "DestinationName": "新店站",
-      "CountDown": "3 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 27 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北小巨蛋站",
       "DestinationName": "新店站",
-      "CountDown": "1 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 35 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1357,263 +1245,287 @@
       "StationName": "南京三民站",
       "DestinationName": "新店站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松山站",
       "DestinationName": "新店站",
-      "CountDown": "2 分鐘 29 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 42 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "新店站",
-      "CountDown": "6 分鐘 1 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南京復興站",
       "DestinationName": "台電大樓站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "古亭站",
+      "DestinationName": "台電大樓站",
+      "CountDown": "4 分鐘 27 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中正紀念堂站",
       "DestinationName": "台電大樓站",
-      "CountDown": "12 分鐘 19 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 52 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "小南門站",
       "DestinationName": "台電大樓站",
-      "CountDown": "10 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山站",
       "DestinationName": "台電大樓站",
-      "CountDown": "4 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "6 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "台電大樓站",
-      "CountDown": "8 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "10 分鐘 38 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "北門站",
       "DestinationName": "台電大樓站",
-      "CountDown": "6 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "8 分鐘 39 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "台北小巨蛋站",
+      "DestinationName": "台電大樓站",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "南京三民站",
+      "DestinationName": "台電大樓站",
+      "CountDown": "10 分鐘 16 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松山站",
       "DestinationName": "台電大樓站",
-      "CountDown": "14 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "7 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "台電大樓站",
-      "CountDown": "1 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 56 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "古亭站",
       "DestinationName": "蘆洲站",
-      "CountDown": "5 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "頂溪站",
       "DestinationName": "蘆洲站",
-      "CountDown": "2 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永安市場站",
       "DestinationName": "蘆洲站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 31 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "景安站",
       "DestinationName": "蘆洲站",
-      "CountDown": "6 分鐘 28 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南勢角站",
       "DestinationName": "蘆洲站",
-      "CountDown": "5 分鐘 35 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 40 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "民權西路站",
       "DestinationName": "蘆洲站",
-      "CountDown": "3 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 14 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝新生站",
       "DestinationName": "蘆洲站",
-      "CountDown": "3 分鐘 4 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 43 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大橋頭站",
       "DestinationName": "蘆洲站",
-      "CountDown": "4 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山國小站",
       "DestinationName": "蘆洲站",
-      "CountDown": "1 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 58 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "行天宮站",
       "DestinationName": "蘆洲站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 57 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "蘆洲站",
-      "CountDown": "5 分鐘 11 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 51 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東門站",
       "DestinationName": "蘆洲站",
-      "CountDown": "0 分鐘 48 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三民高中站",
       "DestinationName": "蘆洲站",
-      "CountDown": "5 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 24 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "徐匯中學站",
       "DestinationName": "蘆洲站",
-      "CountDown": "3 分鐘 26 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 38 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三和國中站",
       "DestinationName": "蘆洲站",
-      "CountDown": "1 分鐘 41 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三重國小站",
       "DestinationName": "蘆洲站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "古亭站",
       "DestinationName": "迴龍站",
-      "CountDown": "1 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 52 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "頂溪站",
       "DestinationName": "迴龍站",
-      "CountDown": "6 分鐘 20 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 51 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永安市場站",
       "DestinationName": "迴龍站",
-      "CountDown": "4 分鐘 6 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 37 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "景安站",
       "DestinationName": "迴龍站",
-      "CountDown": "2 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 43 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南勢角站",
       "DestinationName": "迴龍站",
-      "CountDown": "1 分鐘 15 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 50 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "民權西路站",
       "DestinationName": "迴龍站",
-      "CountDown": "7 分鐘 27 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 7 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1621,143 +1533,143 @@
       "StationName": "忠孝新生站",
       "DestinationName": "迴龍站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "輔大站",
       "DestinationName": "迴龍站",
-      "CountDown": "8 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新莊站",
       "DestinationName": "迴龍站",
-      "CountDown": "5 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 2 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "頭前庄站",
       "DestinationName": "迴龍站",
-      "CountDown": "3 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 12 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "先嗇宮站",
       "DestinationName": "迴龍站",
-      "CountDown": "1 分鐘 44 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三重站",
       "DestinationName": "迴龍站",
-      "CountDown": "7 分鐘 1 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 29 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "菜寮站",
       "DestinationName": "迴龍站",
-      "CountDown": "5 分鐘 26 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 36 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北橋站",
       "DestinationName": "迴龍站",
-      "CountDown": "3 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大橋頭站",
       "DestinationName": "迴龍站",
-      "CountDown": "0 分鐘 50 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 43 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山國小站",
       "DestinationName": "迴龍站",
-      "CountDown": "5 分鐘 52 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 32 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "行天宮站",
       "DestinationName": "迴龍站",
-      "CountDown": "3 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 50 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "迴龍站",
-      "CountDown": "2 分鐘 7 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 6 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "東門站",
       "DestinationName": "迴龍站",
-      "CountDown": "4 分鐘 45 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 7 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "丹鳳站",
       "DestinationName": "迴龍站",
-      "CountDown": "2 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 47 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "古亭站",
       "DestinationName": "南勢角站",
-      "CountDown": "2 分鐘 3 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 33 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "頂溪站",
       "DestinationName": "南勢角站",
-      "CountDown": "1 分鐘 32 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永安市場站",
       "DestinationName": "南勢角站",
-      "CountDown": "3 分鐘 40 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 24 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "景安站",
       "DestinationName": "南勢角站",
-      "CountDown": "1 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 48 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1765,31 +1677,31 @@
       "StationName": "民權西路站",
       "DestinationName": "南勢角站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝新生站",
       "DestinationName": "南勢角站",
-      "CountDown": "3 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 56 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "輔大站",
       "DestinationName": "南勢角站",
-      "CountDown": "4 分鐘 0 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新莊站",
       "DestinationName": "南勢角站",
-      "CountDown": "6 分鐘 49 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 59 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1797,71 +1709,71 @@
       "StationName": "頭前庄站",
       "DestinationName": "南勢角站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "先嗇宮站",
       "DestinationName": "南勢角站",
-      "CountDown": "2 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 6 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三重站",
       "DestinationName": "南勢角站",
-      "CountDown": "4 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 51 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "菜寮站",
       "DestinationName": "南勢角站",
-      "CountDown": "6 分鐘 47 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北橋站",
       "DestinationName": "南勢角站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 30 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大橋頭站",
       "DestinationName": "南勢角站",
-      "CountDown": "2 分鐘 40 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 37 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "中山國小站",
       "DestinationName": "南勢角站",
-      "CountDown": "2 分鐘 12 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 5 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "行天宮站",
       "DestinationName": "南勢角站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 0 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "松江南京站",
       "DestinationName": "南勢角站",
-      "CountDown": "1 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1869,71 +1781,71 @@
       "StationName": "東門站",
       "DestinationName": "南勢角站",
       "CountDown": "1 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "蘆洲站",
       "DestinationName": "南勢角站",
-      "CountDown": "5 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 22 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三民高中站",
       "DestinationName": "南勢角站",
-      "CountDown": "6 分鐘 50 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "徐匯中學站",
       "DestinationName": "南勢角站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三和國中站",
       "DestinationName": "南勢角站",
-      "CountDown": "2 分鐘 3 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 22 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "三重國小站",
       "DestinationName": "南勢角站",
-      "CountDown": "4 分鐘 7 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 26 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "迴龍站",
       "DestinationName": "南勢角站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 1 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "丹鳳站",
       "DestinationName": "南勢角站",
-      "CountDown": "1 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝復興站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 22 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 37 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -1941,103 +1853,103 @@
       "StationName": "台北車站",
       "DestinationName": "南港展覽館站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "頂埔站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 21 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 6 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永寧站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "3 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 2 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "土城站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "5 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "海山站",
-      "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "亞東醫院站",
-      "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 3 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "府中站",
       "DestinationName": "南港展覽館站",
       "CountDown": "2 分鐘 32 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "亞東醫院站",
+      "DestinationName": "南港展覽館站",
+      "CountDown": "2 分鐘 47 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "府中站",
+      "DestinationName": "南港展覽館站",
+      "CountDown": "0 分鐘 57 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "板橋站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 6 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新埔站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 57 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "江子翠站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 43 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "龍山寺站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 29 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "0 分鐘 47 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "善導寺站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 48 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -2045,7 +1957,7 @@
       "StationName": "忠孝新生站",
       "DestinationName": "南港展覽館站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -2053,127 +1965,127 @@
       "StationName": "忠孝敦化站",
       "DestinationName": "南港展覽館站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "國父紀念館站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 55 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 25 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "市政府站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 8 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永春站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 54 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "後山埤站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 15 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "昆陽站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "2 分鐘 19 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港站",
       "DestinationName": "南港展覽館站",
-      "CountDown": "1 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝復興站",
       "DestinationName": "頂埔站",
-      "CountDown": "4 分鐘 44 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 54 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港展覽館站",
       "DestinationName": "頂埔站",
-      "CountDown": "4 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北車站",
       "DestinationName": "頂埔站",
-      "CountDown": "3 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永寧站",
       "DestinationName": "頂埔站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 44 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "土城站",
       "DestinationName": "頂埔站",
-      "CountDown": "4 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 41 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "海山站",
       "DestinationName": "頂埔站",
-      "CountDown": "2 分鐘 1 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 37 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "亞東醫院站",
       "DestinationName": "頂埔站",
-      "CountDown": "5 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 1 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "府中站",
       "DestinationName": "頂埔站",
-      "CountDown": "3 分鐘 48 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 27 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "板橋站",
       "DestinationName": "頂埔站",
-      "CountDown": "2 分鐘 17 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 56 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -2181,39 +2093,39 @@
       "StationName": "新埔站",
       "DestinationName": "頂埔站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "江子翠站",
       "DestinationName": "頂埔站",
-      "CountDown": "5 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 26 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "龍山寺站",
       "DestinationName": "頂埔站",
-      "CountDown": "1 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 42 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "頂埔站",
-      "CountDown": "6 分鐘 6 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 34 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "善導寺站",
       "DestinationName": "頂埔站",
-      "CountDown": "1 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
@@ -2221,415 +2133,415 @@
       "StationName": "忠孝新生站",
       "DestinationName": "頂埔站",
       "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝敦化站",
       "DestinationName": "頂埔站",
-      "CountDown": "3 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 3 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "國父紀念館站",
       "DestinationName": "頂埔站",
-      "CountDown": "1 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 38 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "市政府站",
       "DestinationName": "頂埔站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 53 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永春站",
       "DestinationName": "頂埔站",
-      "CountDown": "4 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "後山埤站",
       "DestinationName": "頂埔站",
-      "CountDown": "3 分鐘 2 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 19 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "昆陽站",
       "DestinationName": "頂埔站",
-      "CountDown": "0 分鐘 37 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 5 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港站",
       "DestinationName": "頂埔站",
-      "CountDown": "5 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 22 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝復興站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "1 分鐘 5 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港展覽館站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "0 分鐘 38 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 23 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "台北車站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "列車進站",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 21 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "府中站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "0 分鐘 34 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 22 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "板橋站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "5 分鐘 41 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 3 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新埔站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "3 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 58 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "江子翠站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "1 分鐘 50 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "龍山寺站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "4 分鐘 47 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 59 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "西門站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "2 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "善導寺站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "5 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝新生站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "3 分鐘 33 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 19 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "忠孝敦化站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "6 分鐘 31 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "3 分鐘 9 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "國父紀念館站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "4 分鐘 58 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 36 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "市政府站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "3 分鐘 13 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "4 分鐘 2 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "永春站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "0 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 20 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "後山埤站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "6 分鐘 8 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "0 分鐘 45 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "昆陽站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "3 分鐘 54 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "7 分鐘 28 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "南港站",
       "DestinationName": "亞東醫院站",
-      "CountDown": "1 分鐘 36 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "5 分鐘 3 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "大坪林站",
       "DestinationName": "新北產業園區站",
-      "CountDown": "7 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "景安站",
-      "DestinationName": "大坪林站",
-      "CountDown": "2 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "景安站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "5 分鐘 28 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "頭前庄站",
-      "DestinationName": "大坪林站",
-      "CountDown": "1 分鐘 46 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "頭前庄站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "4 分鐘 56 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "十四張站",
-      "DestinationName": "大坪林站",
-      "CountDown": "8 分鐘 49 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "十四張站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "9 分鐘 19 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "秀朗橋站",
-      "DestinationName": "大坪林站",
-      "CountDown": "6 分鐘 24 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "秀朗橋站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "1 分鐘 39 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "景平站",
-      "DestinationName": "大坪林站",
-      "CountDown": "4 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "景平站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "3 分鐘 32 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中和站",
-      "DestinationName": "大坪林站",
-      "CountDown": "8 分鐘 18 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中和站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "9 分鐘 19 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "橋和站",
-      "DestinationName": "大坪林站",
-      "CountDown": "5 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "橋和站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "1 分鐘 14 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中原站",
-      "DestinationName": "大坪林站",
-      "CountDown": "3 分鐘 47 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "中原站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "2 分鐘 53 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "板新站",
-      "DestinationName": "大坪林站",
       "CountDown": "1 分鐘 7 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
-      "StationName": "板新站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "5 分鐘 23 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "板橋站",
+      "StationName": "景安站",
       "DestinationName": "大坪林站",
-      "CountDown": "8 分鐘 30 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "2 分鐘 45 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
-      "StationName": "板橋站",
+      "StationName": "景安站",
       "DestinationName": "新北產業園區站",
-      "CountDown": "8 分鐘 21 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
-      "StationName": "新埔民生站",
-      "DestinationName": "大坪林站",
-      "CountDown": "4 分鐘 51 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "新埔民生站",
-      "DestinationName": "新北產業園區站",
-      "CountDown": "2 分鐘 1 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
-      "LineID": null,
-      "StationID": null
-    },
-    {
-      "StationName": "幸福站",
+      "StationName": "頭前庄站",
       "DestinationName": "大坪林站",
       "CountDown": "未知",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "頭前庄站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "4 分鐘 24 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "十四張站",
+      "DestinationName": "大坪林站",
+      "CountDown": "5 分鐘 4 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "十四張站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "3 分鐘 13 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "秀朗橋站",
+      "DestinationName": "大坪林站",
+      "CountDown": "2 分鐘 55 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "秀朗橋站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "1 分鐘 13 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "景平站",
+      "DestinationName": "大坪林站",
+      "CountDown": "1 分鐘 12 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "景平站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "2 分鐘 49 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "中和站",
+      "DestinationName": "大坪林站",
+      "CountDown": "未知",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "中和站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "3 分鐘 47 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "橋和站",
+      "DestinationName": "大坪林站",
+      "CountDown": "1 分鐘 35 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "橋和站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "1 分鐘 10 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "中原站",
+      "DestinationName": "大坪林站",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "中原站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "2 分鐘 43 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "板新站",
+      "DestinationName": "大坪林站",
+      "CountDown": "2 分鐘 23 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "板新站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "板橋站",
+      "DestinationName": "大坪林站",
+      "CountDown": "列車進站",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "板橋站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "未知",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "新埔民生站",
+      "DestinationName": "大坪林站",
+      "CountDown": "2 分鐘 5 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "新埔民生站",
+      "DestinationName": "新北產業園區站",
+      "CountDown": "2 分鐘 2 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
+      "LineID": null,
+      "StationID": null
+    },
+    {
+      "StationName": "幸福站",
+      "DestinationName": "大坪林站",
+      "CountDown": "2 分鐘 12 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "幸福站",
       "DestinationName": "新北產業園區站",
-      "CountDown": "7 分鐘 20 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "1 分鐘 3 秒",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     },
     {
       "StationName": "新北產業園區站",
       "DestinationName": "大坪林站",
-      "CountDown": "7 分鐘 10 秒",
-      "NowDateTime": "2025-08-25 21:02:42",
+      "CountDown": "未知",
+      "NowDateTime": "2025-08-28 18:10:27",
       "LineID": null,
       "StationID": null
     }

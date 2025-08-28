@@ -86,10 +86,10 @@ class MetroSoapService:
 
         headers = {'Content-Type': 'text/xml; charset=utf-8', 'SOAPAction': soap_action}
         try:
-            logger.info(f"🚀 正在呼叫 {soap_action}...")
+            logger.debug(f"🚀 正在呼叫 {soap_action}...")
             response = requests.post(api_url, data=soap_body.encode('utf-8'), headers=headers, timeout=timeout)
             response.raise_for_status()
-            logger.info(f"✅ 呼叫 {soap_action} 成功。")
+            logger.debug(f"✅ 呼叫 {soap_action} 成功。")
             return response
         except requests.RequestException as e:
             logger.error(f"❌ 呼叫 SOAP API 時發生錯誤 (URL: {api_url}): {e}", exc_info=True)
@@ -739,7 +739,7 @@ class MetroSoapService:
                             'StationID': item.get('StationID')
                         })
                     
-                    logger.info(f"✅ 成功解析了 {len(clean_data)} 筆即時列車預測資訊。")
+                    logger.debug(f"✅ 成功解析了 {len(clean_data)} 筆即時列車預測資訊。")
                     return clean_data
                 else:
                     logger.warning(f"⚠️ 警告：getTrackInfo API 解析成功，但不是預期的 JSON 陣列。類型: {type(items)}")

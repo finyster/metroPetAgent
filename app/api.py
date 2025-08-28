@@ -1,8 +1,9 @@
-# app/api.py (最終 Conversation Summary Memory 增強版)
+# app/api.py (最終 Conversation Summary Memory 增強版 + 日誌回呼功能)
 
 from fastapi import APIRouter, HTTPException
 import logging
 from typing import Any, Dict
+import uuid # 【★★★ 新增匯入 ★★★】 用於生成獨立的 session ID
 
 # 從 schemas.py 匯入 API 的請求與回應模型
 from app.schemas import ChatRequest, ChatResponse, ChatHistory
@@ -18,6 +19,10 @@ from langchain.agents import AgentExecutor
 from langchain_groq import ChatGroq
 # 導入設定檔
 import config
+
+# 【★★★ 新增匯入 ★★★】
+# 導入我們的資料庫回呼處理器
+from utils.callbacks import DatabaseCallbackHandler
 
 
 logger = logging.getLogger(__name__)
@@ -44,6 +49,13 @@ async def chat_with_agent(request: ChatRequest):
     處理聊天請求的核心 API 端點（已升級為 Conversation Summary Memory）。
     """
     try:
+        # --- 【★★★ 新增邏輯：建立日誌回呼 ★★★】 ---
+        session_id = str(uuid.uuid4()) # 為這次對話生成一個獨一無二的 ID
+        db_callback = DatabaseCallbackHandler(
+            user_question=request.message,
+            session_id=session_id
+        )
+        
         # --- 步驟 1: 為本次對話建立並載入「摘要記憶體」 ---
         
         # 建立一個新的 ConversationSummaryBufferMemory 物件。
@@ -51,7 +63,7 @@ async def chat_with_agent(request: ChatRequest):
         # 將最舊的對話內容「壓縮」成一段摘要，以節省空間。
         memory = ConversationSummaryBufferMemory(
             llm=memory_llm,
-            max_token_limit=1500,       # 建議的 Token 上限，可容納近期詳細對話 + 遠期摘要
+            max_token_limit=500,       # 建議的 Token 上限，可容納近期詳細對話 + 遠期摘要
             memory_key="chat_history", # 必須對應 Agent Prompt 中的 MessagesPlaceholder
             input_key="input",         # 必須明確告知 Memory 哪個是使用者的輸入
             return_messages=True
@@ -80,8 +92,12 @@ async def chat_with_agent(request: ChatRequest):
         
         logger.info("🚀 正在執行帶有 Summary Buffer Memory 的 AgentExecutor 流程...")
         
-        # 執行 Agent
-        result = await agent_executor.ainvoke(input_payload)
+        # 【★★★ 修改 Agent 呼叫 ★★★】
+        # 執行 Agent，並將我們建立的 db_callback 作為參數傳入
+        result = await agent_executor.ainvoke(
+            input_payload,
+            config={"callbacks": [db_callback]}
+        )
         final_output = result['output']
 
         # --- 步驟 3: 從 Memory 取回更新後的歷史紀錄並回傳 ---

@@ -66,8 +66,6 @@ class RoutingManager:
         return line_map.get(line_code, (line_code, '未知顏色', ''))
 
     def _build_metro_graph(self) -> nx.Graph:
-        # ... 此方法與上一版相同，為節省篇幅省略 ...
-        # (請保留您檔案中此方法的完整程式碼)
         G = nx.Graph()
         all_routes_data = tdx_api.get_all_stations_of_route()
         if not all_routes_data:
@@ -332,4 +330,77 @@ class RoutingManager:
                         terminal_stations.add(terminus_name)
 
         return sorted(list(terminal_stations))
+    
+    def get_neighbor_stations(self, station_name: str) -> dict:
+        """
+        【新功能】根據站名，找出路網圖上所有直接相鄰的車站。
+        """
+        station_ids = self.station_manager.get_station_ids(station_name)
+        if not station_ids or not isinstance(station_ids, list):
+            return {"error": f"找不到車站「{station_name}」。"}
+
+        neighbor_names = set()
+        for sid in station_ids:
+            if self.graph.has_node(sid):
+                # graph.neighbors(sid) 會回傳所有與 sid 直接相連的節點
+                for neighbor_id in self.graph.neighbors(sid):
+                    # 我們只關心 'ride' 類型的鄰居，排除轉乘的內部節點
+                    edge_data = self.graph.get_edge_data(sid, neighbor_id)
+                    if edge_data and edge_data.get('type') == 'ride':
+                        neighbor_name = self.station_id_to_name.get(neighbor_id, neighbor_id)
+                        neighbor_names.add(neighbor_name)
+
+        if not neighbor_names:
+            return {"error": f"在路網圖中找不到「{station_name}」的鄰近車站。"}
+
+        official_station_name = self.station_manager.resolve_station_alias(station_name)
+        return {
+            "station_name": official_station_name,
+            "neighbors": sorted(list(neighbor_names))
+        }
+    
+    def get_lines_for_station(self, station_name: str) -> dict:
+        """
+        【新功能】根據站名，找出該站點所屬的所有捷運路線。
+        """
+        # 使用 station_manager 解析站名，以處理別名並獲取所有可能的 ID (例如 "BL12", "R10")
+        station_ids = self.station_manager.get_station_ids(station_name)
+        if not station_ids or not isinstance(station_ids, list):
+            return {"error": f"找不到車站「{station_name}」。"}
+
+        found_lines = set()
+        # 遍歷我們已知的每一條路線
+        for line_name, details in self.line_details.items():
+            line_stations_ids = details.get("stations", [])
+            # 檢查這個站的任何一個 ID 是否存在於這條路線的站點列表中
+            if any(sid in line_stations_ids for sid in station_ids):
+                found_lines.add(line_name)
+        
+        if not found_lines:
+            return {"error": f"在路網資料中找不到「{station_name}」所屬的任何捷運路線。"}
+
+        # 整理找到的路線資訊，包含顏色等
+        lines_with_details = []
+        for line in sorted(list(found_lines)):
+            details = self.line_details.get(line, {})
+            # 從路線代碼反查 CSS class 以便前端美化
+            line_code = ""
+            if details.get("stations"):
+                line_code_match = re.match(r"([A-Z]+)", details["stations"][0])
+                if line_code_match:
+                    line_code = line_code_match.group(1)
+            
+            _, line_color, line_class = self._get_line_name_and_color(line_code)
+            lines_with_details.append({
+                "line_name": line,
+                "color": line_color,
+                "line_class_css": line_class
+            })
+        
+        official_station_name = self.station_manager.resolve_station_alias(station_name)
+        return {
+            "station_name": official_station_name,
+            "lines": lines_with_details
+        }
+    
         

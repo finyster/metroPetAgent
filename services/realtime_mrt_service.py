@@ -153,7 +153,7 @@ class RealtimeMRTService:
 
     def _periodic_update_cache(self):
         while not self._stop_event.is_set():
-            logger.info("--- RealtimeMRTService: 正在刷新即時列車資訊緩存... ---")
+            logger.debug("--- RealtimeMRTService: 正在刷新即時列車資訊緩存... ---")
             try:
                 all_track_info = self.metro_soap_api.get_realtime_track_info()
                 if all_track_info:
@@ -162,7 +162,7 @@ class RealtimeMRTService:
                     os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
                     with open(self.db_path, 'w', encoding='utf-8') as f:
                         json.dump({"timestamp": self._cache_timestamp.isoformat(), "trains": all_track_info}, f, ensure_ascii=False, indent=2)
-                    logger.info(f"--- ✅ 緩存刷新完成，共 {len(all_track_info)} 筆列車資訊，存至 {self.db_path} ---")
+                    logger.debug(f"--- ✅ 緩存刷新完成，共 {len(all_track_info)} 筆列車資訊，存至 {self.db_path} ---")
                 else:
                     logger.warning("--- ⚠️ 未從 Metro API 獲取到任何列車資訊 ---")
             except Exception as e:

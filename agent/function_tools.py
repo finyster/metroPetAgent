@@ -98,6 +98,7 @@ first_last_train_time_service = service_registry.get_first_last_train_time_servi
 realtime_mrt_service = service_registry.get_realtime_mrt_service()
 # time_service = service_registry.get_time_service() # <- 舊的可以刪除或註解掉
 llm_time_parser = service_registry.get_llm_time_parser_service() # ✨ 1. 獲取 LLMTimeParserService 實例
+llm_network_service = service_registry.get_llm_network_service() # 獲取新服務的實例
 
 # ... (其他工具)
 
@@ -407,31 +408,45 @@ def get_first_last_train_time(station_name: str) -> str:
 # ---------------------------------------------------------------------
 @tool
 def get_station_exit_info(station_name: str) -> str:
-    """【車站出口專家】列出所有出口編號與描述。"""
-    logger.info(f"[出口] {station_name}")
-    station_ids = station_manager.get_station_ids(station_name)
-    if not station_ids:
-        return json.dumps({"error": f"找不到車站「{station_name}」。"}, ensure_ascii=False)
+    """【車站出口專家 v3.0 - 最終修正版】根據詳細的車廂對應資料，列出一個車站所有不重複的出口編號。"""
+    logger.info(f"[出口 v3.0] 正在從詳細對應表解析「{station_name}」的所有出口...")
+    
+    # 獲取 car_exit_map (其來源正是 mrt_station_exits.json)
+    car_exit_data = local_data_manager.car_exit_map
+    if not car_exit_data:
+        return json.dumps({"error": "車廂出口對應資料尚未載入。"}, ensure_ascii=False)
 
-    exit_map = local_data_manager.exits
-    exits: list[str] = []
-    for sid in station_ids:
-        exits.extend(
-            f"出口 {e.get('ExitNo', 'N/A')}: {e.get('Description', '無描述')}"
-            for e in exit_map.get(sid, [])
-        )
+    # 使用與 get_best_car_for_exit 相同的邏輯來尋找車站
+    norm_station = normalize_station_name(station_name)
+    station_info = next((item for item in car_exit_data if normalize_station_name(item.get("station")) == norm_station), None)
+            
+    if not station_info:
+        return json.dumps({"error": f"找不到「{station_name}」的車廂出口對應資料。"}, ensure_ascii=False)
 
-    if not exits:
-        return json.dumps({"error": f"查無「{station_name}」出口資訊"}, ensure_ascii=False)
+    # 核心邏輯：深入挖掘，收集所有出口編號
+    all_exit_numbers = set()
+    directions_data = station_info.get("Directions", {})
+    
+    # 遍歷所有方向 (例如 "往南港展覽館", "往動物園")
+    for direction_name, direction_details in directions_data.items():
+        # 遍歷該方向下的車廂列表
+        for car_info in direction_details.get("list", []):
+            # 將該車廂對應的所有出口編號加入集合
+            for exit_num in car_info.get("exits", []):
+                all_exit_numbers.add(str(exit_num)) # 轉為字串以保持一致性
 
-    if all(x.endswith(": 無描述") for x in exits):
-        msg = (f"「{station_name}」共有 {len(exits)} 個出入口，"
-               "但暫無詳細描述。")
-    else:
-        msg = f"「{station_name}」出口資訊：\n" + "\n".join(exits)
+    if not all_exit_numbers:
+        return json.dumps({"error": f"在詳細資料中未找到「{station_name}」的任何出口編號。"}, ensure_ascii=False)
 
-    return json.dumps({"station": station_name, "exits": exits,
-                       "message": msg}, ensure_ascii=False)
+    # 排序並組合最終訊息
+    sorted_exits = sorted(list(all_exit_numbers), key=lambda x: int(x) if x.isdigit() else float('inf'))
+    message = f"「{station_name}」站總共包含的出口有：出口 {', '.join(sorted_exits)}。"
+
+    return json.dumps({
+        "station": station_name,
+        "exits": sorted_exits,
+        "message": message
+    }, ensure_ascii=False)
 
 # ---------------------------------------------------------------------
 # 5. 車站設施
@@ -798,116 +813,31 @@ def list_available_food_maps() -> str:
     }, ensure_ascii=False, indent=2)
 
 @tool
-def query_metro_network(
-    query_type: str,
-    line_name: Optional[str] = None
-) -> str:
+def query_metro_network(user_question: str) -> str:
     """
-    【捷運路網知識庫 v2.0 - 顏色增強版】
-    處理所有關於捷運路網的知識型查詢。
-    - query_type: 查詢類型，必須是 'list_lines' (所有路線), 'list_stations' (所有車站), 或 'line_details' (特定路線詳情)。
-    - line_name: 當 query_type 為 'line_details' 時，必須提供要查詢的路線名稱。
+    【萬能路網問答專家 v3.0】
+    處理所有關於捷運路網的知識型問題，無論是簡單的條列式查詢還是複雜的對話式問題，都使用此工具。
+    它會將使用者的問題交給一個專門的路網問答 LLM 來生成最合適的答案。
     """
-    logger.info(f"🗺️ [路網查詢 v2.0] 正在執行查詢，類型: {query_type}, 路線: {line_name}")
-
-    # 建立一個從路線中文名反查路線代碼(SCODE)的字典，以便後續查找CSS class
-    line_name_to_code_map = {
-        '板南線': 'BL', '文湖線': 'BR', '淡水信義線': 'R',
-        '松山新店線': 'G', '中和新蘆線': 'O', '環狀線': 'Y'
-    }
-    # 建立一個從路線代碼反查 CSS class 的字典
-    code_to_class_map = {
-        'BL': 'line-bl', 'BR': 'line-br', 'R': 'line-r',
-        'G': 'line-g', 'O': 'line-o', 'Y': 'line-y'
-    }
-
-    if query_type == "list_lines":
-        all_lines_data = routing_manager.list_all_lines()
-        if "error" in all_lines_data:
-            return json.dumps(all_lines_data, ensure_ascii=False)
-        
-        lines_summary = all_lines_data.get("lines", [])
-        
-        # ✨ 核心修改：為每一條路線加上顏色標籤
-        message_parts = [f"台北捷運目前有 {len(lines_summary)} 條主要路線：\n"]
-        for line_info in lines_summary:
-            name = line_info.get("line_name", "")
-            color = line_info.get("color", "")
-            
-            line_code = line_name_to_code_map.get(name, "")
-            line_class = code_to_class_map.get(line_code, "")
-            
-            # 使用 Markdown 的列表格式，並在內部使用 HTML span 標籤
-            colored_line_text = f'- <span class="{line_class}">{name} ({color})</span>'
-            message_parts.append(colored_line_text)
-            
-        all_lines_data["message"] = "\n".join(message_parts)
-        return json.dumps(all_lines_data, ensure_ascii=False, indent=2)
-    
-    elif query_type == "list_stations":
-        # 這個查詢類型與路線顏色無關，保持不變
-        station_names = station_manager.get_all_station_names()
-        if not station_names:
-            return json.dumps({"error": "無法獲取車站列表。"}, ensure_ascii=False)
-        return json.dumps({
-            "count": len(station_names),
-            "stations": station_names,
-            "message": f"台北捷運系統目前共有 {len(station_names)} 個車站。"
-        }, ensure_ascii=False, indent=2)
-
-    elif query_type == "line_details":
-        if not line_name:
-            return json.dumps({"error": "查詢路線詳情時，必須提供路線名稱。"}, ensure_ascii=False)
-        
-        # ... (標準化路線名稱的邏輯保持不變)
-        normalized_map = {
-            "棕": "文湖線", "文湖": "文湖線", "br": "文湖線",
-            "紅": "淡水信義線", "淡水信義": "淡水信義線", "r": "淡水信義線",
-            "綠": "松山新店線", "松山新店": "松山新店線", "g": "松山新店線",
-            "橘": "中和新蘆線", "中和新蘆": "中和新蘆線", "o": "中和新蘆線",
-            "藍": "板南線", "板南": "板南線", "bl": "板南線",
-            "黃": "環狀線", "環狀": "環狀線", "y": "環狀線",
-        }
-        best_match_name = line_name
-        for key, value in normalized_map.items():
-            if key in line_name.lower():
-                best_match_name = value
-                break
-        
-        line_details_data = routing_manager.get_line_details(best_match_name)
-        if "error" in line_details_data:
-            return json.dumps(line_details_data, ensure_ascii=False)
-            
-        # ✨ 核心修改：為路線名稱加上顏色標籤
-        name = line_details_data.get("line_name", "")
-        color = line_details_data.get("color", "")
-        stations = line_details_data.get("stations", [])
-        
-        line_code = line_name_to_code_map.get(name, "")
-        line_class = code_to_class_map.get(line_code, "")
-
-        colored_line_name = f'<span class="{line_class}">{name} ({color})</span>'
-        
-        line_details_data["message"] = f"{colored_line_name} 沿線車站包含：{'、'.join(stations)}。"
-        return json.dumps(line_details_data, ensure_ascii=False, indent=2)
-
-    else:
-        return json.dumps({"error": f"不支援的查詢類型: {query_type}"}, ensure_ascii=False)
+    logger.info(f"🧠 [萬能路網工具] 正在處理問題: '{user_question}'")
+    # 這裡的 llm_network_service 實例我們在上一輪已經加載好了
+    return llm_network_service.answer_query(user_question)
 
 @tool
 def get_best_car_for_exit(
     station_name: str, 
-    exit_identifier: str, 
+    exit_identifier: Optional[str] = None, # 1. 將出口設為可選參數
     start_station_name: Optional[str] = None
 ) -> str:
     """
-    【下車站點優化專家 v2.0】
-    當使用者想知道在某個車站下車後，前往特定出口應該搭乘哪節車廂時使用。
+    【下車站點優化專家 v3.0 - 智慧引導版】
+    當使用者想知道前往特定出口應該搭乘哪節車廂時使用。
+    如果使用者沒有提供出口，此工具會列出所有可用出口並反問使用者。
     - station_name: 抵達的車站名稱。
-    - exit_identifier: 想去的出口編號或代碼 (例如 '2' 或 'M3')。
-    - start_station_name (可選): 使用者的出發站。如果提供，可以回傳更精確的單一方向結果。
+    - exit_identifier (可選): 想去的出口編號。如果未提供，將觸發引導模式。
+    - start_station_name (可選): 使用者的出發站。
     """
-    logger.info(f" optimizing [最佳車廂推薦 v2.0] 正在為「{station_name}」站查詢靠近「{exit_identifier}」的車廂，出發站：「{start_station_name}」。")
+    logger.info(f" optimizing [最佳車廂推薦 v3.0] 正在為「{station_name}」站查詢，出口：「{exit_identifier}」，出發站：「{start_station_name}」。")
 
     car_exit_data = local_data_manager.car_exit_map
     if not car_exit_data:
@@ -919,18 +849,45 @@ def get_best_car_for_exit(
     if not station_info:
         return json.dumps({"error": f"找不到「{station_name}」的車廂出口資料。"}, ensure_ascii=False)
 
-    # ✨ 修正 bug：確保比對時，將出口編號都視為字串
+    # --- 【★★★ 全新核心邏輯：智慧引導 ★★★】 ---
+    # 2. 檢查使用者是否沒有提供出口
+    if not exit_identifier:
+        logger.info(f"--- 未提供出口，觸發智慧引導模式 for {station_name} ---")
+        
+        # 複用 get_station_exit_info 的邏輯來收集所有出口
+        all_exit_numbers = set()
+        directions_data = station_info.get("Directions", {})
+        for direction_details in directions_data.values():
+            for car_info in direction_details.get("list", []):
+                for exit_num in car_info.get("exits", []):
+                    all_exit_numbers.add(str(exit_num))
+
+        if not all_exit_numbers:
+            return json.dumps({"message": f"抱歉，我找不到「{station_name}」的任何出口資訊。"}, ensure_ascii=False)
+        
+        # 3. 組合引導式的回答
+        sorted_exits = sorted(list(all_exit_numbers), key=lambda x: int(x) if x.isdigit() else float('inf'))
+        exits_str = ", ".join(sorted_exits)
+        
+        start_str = f"從「{start_station_name}」到" if start_station_name else ""
+        message = (
+            f"好的，為了幫您找到 {start_str}「{station_name}」站最方便的下車車廂，"
+            f"我需要知道您想前往哪個出口喔！\n\n"
+            f"「{station_name}」站總共有以下出口：**{exits_str}**\n\n"
+            f"請告訴我您要去幾號出口，我就能為您提供建議！"
+        )
+        return json.dumps({"message": message}, ensure_ascii=False)
+    # --- 【智慧引導邏輯結束】 ---
+
+    # 如果使用者提供了出口，則執行原本的查詢邏輯...
     target_exit = str(exit_identifier).replace('號', '').replace('出口', '').strip()
 
-    # 預先計算目標方向
     target_direction = None
     if start_station_name:
-        # 使用 routing_manager 來解析出正確的終點站方向
         resolved_start = station_manager.resolve_station_alias(start_station_name)
         resolved_end = station_manager.resolve_station_alias(station_name)
         terminus_list = routing_manager.resolve_direction(resolved_start, resolved_end)
         if terminus_list:
-            # 在 Directions 中，鍵值通常是 "往淡水", "往象山"
             target_direction = next((f"往{term}" for term in terminus_list if f"往{term}" in station_info.get("Directions", {})), None)
             logger.info(f"--- 透過出發站「{start_station_name}」，成功解析出目標方向為: {target_direction} ---")
 
@@ -938,16 +895,12 @@ def get_best_car_for_exit(
     directions_data = station_info.get("Directions", {})
     
     for direction_name, direction_details in directions_data.items():
-        # 如果已算出目標方向，就只處理該方向的資料
         if target_direction and direction_name != target_direction:
             continue
-
         found_cars = []
         for car_info in direction_details.get("list", []):
-            # ✨ 修正 bug：將資料中的出口也轉為字串進行比對
             if target_exit in [str(e) for e in car_info.get("exits", [])]:
                 found_cars.append(str(car_info.get("car")))
-        
         if found_cars:
             results_by_direction[direction_name] = found_cars
 
@@ -955,14 +908,11 @@ def get_best_car_for_exit(
         message = f"很抱歉，在「{station_name}」站的資料中，沒有找到靠近 {exit_identifier} 出口的車廂資訊。建議您在月台留意出口指示圖。"
         return json.dumps({"station": station_name, "exit_identifier": exit_identifier, "found": False, "message": message}, ensure_ascii=False)
     
-    # 根據是否有 target_direction，決定回傳的訊息格式
     if target_direction and target_direction in results_by_direction:
-        # 如果有明確方向，回傳簡潔的單一結果
         cars = results_by_direction[target_direction]
         car_str = "、".join(cars)
         message = f"好的！從「{start_station_name}」搭到「{station_name}」站後，若要前往 {exit_identifier} 出口，建議您搭乘第 **{car_str}** 節車廂會最快抵達！"
     else:
-        # 如果沒有提供出發站，回傳所有可能的方向
         message_parts = [f"好的！如果您要在「{station_name}」站前往 {exit_identifier} 出口，建議的車廂位置如下：\n"]
         for direction, cars in results_by_direction.items():
             car_str = "、".join(cars)
@@ -1327,6 +1277,7 @@ def get_user_manual_info(topic: str, category: Optional[str] = None) -> str:
         f"你可以問我**「你有什麼功能？」**來看看我能為你做些什麼喔！"
     )
     return json.dumps({"topic": "整體介紹", "message": message}, ensure_ascii=False, indent=2)
+
 
 # =====================================================================
 # 最終工具列表 (Final Tool List)

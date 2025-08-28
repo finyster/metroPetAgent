@@ -38,3 +38,5 @@ langchain-community
 
 torch>=2.1
 google-generativeai
+dateparser
+holidays
